@@ -6,6 +6,8 @@ description: Use when generating diagrams, charts, or technical illustrations.
   "block diagram", "pyramid diagram", "DAG", "C4 diagram", "context map",
   "use case diagram", "activity diagram", "subdomain decomposition",
   or any request for visual/graphical output in SVG or PNG format.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+version: 0.1.0
 ---
 
 # Diagram Generation

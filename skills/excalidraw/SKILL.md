@@ -3,6 +3,10 @@ name: excalidraw
 description: Generate Excalidraw diagrams (.excalidraw JSON files). Use when
   the user wants editable diagrams with a hand-drawn sketch aesthetic, or
   explicitly asks for Excalidraw output.
+  Trigger phrases: "excalidraw", "editable diagram", "sketch diagram",
+  "hand-drawn diagram".
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+version: 0.1.0
 ---
 
 # Diagramming with Excalidraw
