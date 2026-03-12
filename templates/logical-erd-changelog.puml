@@ -1,0 +1,98 @@
+@startuml logical_erd_changelog
+skinparam backgroundColor transparent
+skinparam class {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 11
+}
+
+title Logical ERD - Changelog
+
+entity "FulfillmentCycle" as cycle {
+  * id : UUID
+  --
+  (see Fulfillment Cycle ERD)
+}
+
+entity "ChangelogEntry" as changelog {
+  * id : UUID
+  --
+  * fulfillment_cycle_id : UUID (FK)
+  * author : VARCHAR
+  * recorded_at : TIMESTAMP
+  * change_year, change_week : INTEGER
+  * entry_type : ENUM
+  --
+  growth_rate : DECIMAL
+  target_type : VARCHAR
+  target_warehouse : VARCHAR
+  fixed_value_amount : DECIMAL
+  fixed_value_type : ENUM
+  fixed_value_store_name : VARCHAR
+  target_store_name : VARCHAR
+  target_product_category : VARCHAR
+}
+
+entity "ElectronicsTarget" as elec_target {
+  * sku_group : VARCHAR
+  * changelog_entry_id : UUID (FK)
+}
+
+entity "ApparelTarget" as apparel_target {
+  * apparel_category : VARCHAR
+  * changelog_entry_id : UUID (FK)
+}
+
+entity "ElectronicsChangeDetail" as elec_detail {
+  * sku_group : VARCHAR
+  * changelog_entry_id : UUID (FK)
+  * store_name : VARCHAR
+  * detail_type : ENUM
+  * week, year : INTEGER
+  --
+  * capacity_before, capacity_after : DECIMAL
+  change_amount : DECIMAL
+  change_unit : ENUM
+  change_rate : DECIMAL
+  original_growth_rate : DECIMAL
+}
+
+entity "ApparelChangeDetail" as apparel_detail {
+  * apparel_category : VARCHAR
+  * changelog_entry_id : UUID (FK)
+  * store_name : VARCHAR
+  * detail_type : ENUM
+  * week, year : INTEGER
+  --
+  * capacity_before, capacity_after : DECIMAL
+  change_amount : DECIMAL
+  change_unit : ENUM
+  change_rate : DECIMAL
+  original_growth_rate : DECIMAL
+}
+
+cycle ||--o{ changelog : "tracks all changes"
+
+changelog ||--o| elec_target : "targets categories\n(growth rate only)"
+changelog ||--o| apparel_target : "targets categories\n(growth rate only)"
+
+changelog ||--o{ elec_detail : "records impacts"
+changelog ||--o{ apparel_detail : "records impacts"
+
+note right of changelog
+  **ChangelogEntry:**
+  Records high-level action
+  (growth rate or fixed value)
+
+  **CategoryTarget:**
+  Which categories were targeted
+  (growth rate operations only)
+
+  **ChangeDetail:**
+  Before/after for every affected
+  store/category/week
+  (all operation types)
+end note
+
+@enduml

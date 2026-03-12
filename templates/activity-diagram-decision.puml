@@ -1,0 +1,57 @@
+@startuml pricing_tier_cascade
+skinparam backgroundColor transparent
+skinparam activity {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 14
+}
+skinparam activityDiamond {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+}
+
+|User|
+start
+:Start Fulfillment Cycle;
+
+|System|
+:Import Historical Values;
+note right
+  October 2025: $100,000
+  (base value from actuals)
+end note
+
+|User|
+:Set December Growth Rate to +20%;
+
+|System|
+:Calculate December Value;
+note right
+  November: $100,000 (unchanged)
+  December = November * (1 + 20%)
+  December = $100,000 * 1.20
+  **December: $120,000**
+end note
+
+|User|
+:Set November Growth Rate to +10%;
+
+|System|
+:Recalculate Cascade;
+note right
+  **November = October * (1 + 10%)**
+  November = $100,000 * 1.10
+  **November: $110,000**
+
+  **December = November * (1 + 20%)**
+  December = $110,000 * 1.20
+  **December: $132,000**
+
+  November changed -> December recalculated
+end note
+
+stop
+
+@enduml

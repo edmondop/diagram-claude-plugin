@@ -1,0 +1,66 @@
+@startuml update_forecast_detailed
+skinparam backgroundColor transparent
+skinparam packageStyle rectangle
+skinparam actor {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+}
+skinparam usecase {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 14
+}
+
+left to right direction
+
+actor "Warehouse Manager /\nStore Owner /\nSupplier /\nOperations Director" as Planner
+
+rectangle "Update Forecast and Capacity Values" {
+
+  rectangle "Apply Growth Rate" {
+    (Apply Growth Rate to Store)
+    (Apply Growth Rate to\nProduct Category)
+    (Apply Growth Rate to Warehouse)
+  }
+
+  rectangle "Apply Manual Override" {
+    (Override Value in Units)
+    (Override Value in Dollars)
+  }
+
+  Planner -- (Apply Growth Rate to Store)
+  Planner -- (Apply Growth Rate to\nProduct Category)
+  Planner -- (Apply Growth Rate to Warehouse)
+  Planner -- (Override Value in Units)
+  Planner -- (Override Value in Dollars)
+  Planner -- (Add New Product Category)
+}
+
+note right of "Apply Growth Rate"
+  Growth rates cascade:
+  Current = Previous * (1 + %)
+  Chain calculations like Excel
+
+  Applied per product category:
+  Each SKU group calculated
+  relative to same group
+  in previous period
+end note
+
+note right of "Apply Manual Override"
+  Direct value entry:
+  - Units: number of items/pallets
+  - Dollars: cost amount
+
+  Breaks the cascade chain
+  for that specific period
+end note
+
+note right of (Add New Product Category)
+  Creates new category entry
+  with all values set to 0
+end note
+
+@enduml

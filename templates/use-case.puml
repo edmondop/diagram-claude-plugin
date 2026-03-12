@@ -1,0 +1,51 @@
+@startuml use_case_fulfillment
+skinparam backgroundColor transparent
+skinparam packageStyle rectangle
+skinparam actor {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+}
+skinparam usecase {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 14
+}
+
+skinparam ranksep 150
+left to right direction
+
+actor "Warehouse Manager" as WarehouseManager
+actor "Store Owner" as StoreOwner
+actor "Supplier" as Supplier
+actor "Operations\nDirector" as Director
+
+rectangle "Order Fulfillment System" {
+  (Start Fulfillment Cycle) <-- Director
+  (Close Fulfillment Cycle) <-- Director
+  (Set Capacity Target) <-- Director
+  (Move to Next Stage) <-- Director
+  (Hold/Release Warehouse) <-- Director
+  (Update Forecast and\nCapacity Values) <-- Director
+  (Inspect Updates\n(changelog)) <-- Director
+
+  WarehouseManager --> (Move to Next Stage)
+  WarehouseManager --> (Hold/Release Warehouse)
+  WarehouseManager --> (Update Forecast and\nCapacity Values)
+  WarehouseManager --> (Inspect Updates\n(changelog))
+
+  StoreOwner --> (Hold/Release Warehouse)
+  StoreOwner --> (Update Forecast and\nCapacity Values)
+  StoreOwner --> (Inspect Updates\n(changelog))
+
+  Supplier --> (Update Forecast and\nCapacity Values)
+  Supplier --> (Inspect Updates\n(changelog))
+}
+
+note right of (Start Fulfillment Cycle)
+  Each region has a separate
+  fulfillment cycle
+end note
+
+@enduml

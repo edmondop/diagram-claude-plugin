@@ -1,0 +1,37 @@
+@startuml c4_context_order_fulfillment
+!include <C4/C4_Context>
+
+LAYOUT_LEFT_RIGHT()
+
+title System Context - Order Fulfillment System
+
+Person(users, "Fulfillment Users", "Warehouse Managers, Store Owners, Suppliers, Operations Directors")
+
+System(fulfillment, "Order Fulfillment System", "Automated order routing, warehouse assignment, and shipment tracking")
+
+System_Ext(payment, "Payment Processing System", "Payment capture and refund management")
+System_Ext(analytics, "Analytics Warehouse", "Historical order and shipping data")
+System_Ext(pricing, "Pricing Engine", "Product pricing and discount rules")
+
+Rel(users, fulfillment, "Manages fulfillment operations")
+
+Rel(fulfillment, analytics, "Queries historical volumes", "SQL")
+Rel(fulfillment, pricing, "Queries shipping rates", "REST API")
+Rel(fulfillment, payment, "Confirms payment status", "API")
+
+note right of fulfillment
+  **Bounded Context: Order Fulfillment**
+  - Fulfillment cycle management
+  - Demand forecasting
+  - Warehouse capacity planning
+  - Routing workflow (PENDING -> SHIPPED)
+end note
+
+note right of payment
+  **Bounded Context: Payments**
+  - Payment capture and settlement
+  - Refund processing
+end note
+
+SHOW_LEGEND()
+@enduml

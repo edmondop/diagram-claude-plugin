@@ -1,0 +1,43 @@
+@startuml fulfillment_cycle_state_machine
+skinparam backgroundColor transparent
+skinparam state {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 12
+}
+skinparam arrow {
+  Color #1a5ad7
+}
+
+[*] --> NEW : Start Fulfillment Cycle\n[Operations Director]
+
+state "NEW" as NEW
+state "WAREHOUSE MANAGER\nREVIEW" as WMR
+state "STORE OWNER\nREVIEW" as SOR
+state "FINAL\nREVIEW" as FR
+state "APPROVED" as APPROVED
+
+NEW --> WMR : Move to Next Stage\n[Warehouse Manager or Operations Director]
+
+WMR --> SOR : Move to Next Stage\n[Warehouse Manager or Operations Director]
+
+SOR --> FR : Move to Next Stage\n[Warehouse Manager or Operations Director]
+
+FR --> APPROVED : Close Fulfillment Cycle\n[Operations Director only]
+
+APPROVED --> [*]
+
+note right of SOR
+  Store Owners can edit
+  during this stage but
+  cannot trigger transitions
+end note
+
+note right of APPROVED
+  Final state
+  Capacity locked and
+  synced to Analytics Warehouse
+end note
+
+@enduml
