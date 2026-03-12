@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Generate professional diagrams from natural language using the best-fit Python library for each diagram type.",
   "skills": [
-    "skills/generate-diagram/SKILL.md"
+    "skills/generate-diagram/SKILL.md",
+    "skills/excalidraw/SKILL.md"
   ],
   "commands": [
     "commands/diagram.md"
