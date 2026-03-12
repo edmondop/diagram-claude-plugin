@@ -9,6 +9,7 @@ No system dependencies required.
 
 Run: uv run pyramid-svgwrite.py
 """
+
 from pathlib import Path
 
 import svgwrite
@@ -21,15 +22,22 @@ OUTPUT = "output/pyramid-svgwrite.svg"
 FONT = "Helvetica, Arial, sans-serif"
 
 LAYERS: list[tuple[str, str, str]] = [
-    ("E2E Tests",         "#e74c3c", "white"),
+    ("E2E Tests", "#e74c3c", "white"),
     ("Integration Tests", "#e67e22", "white"),
-    ("Component Tests",   "#3498db", "white"),
-    ("Unit Tests",        "#2ecc71", "white"),
+    ("Component Tests", "#3498db", "white"),
+    ("Unit Tests", "#2ecc71", "white"),
 ]
 
 
-def x_at_y(*, y: float, center_x: float, top_width: float,
-           bottom_width: float, top_y: float, bottom_y: float) -> float:
+def x_at_y(
+    *,
+    y: float,
+    center_x: float,
+    top_width: float,
+    bottom_width: float,
+    top_y: float,
+    bottom_y: float,
+) -> float:
     frac = (y - top_y) / (bottom_y - top_y)
     half_w = (top_width + (bottom_width - top_width) * frac) / 2
     return center_x - half_w
@@ -38,8 +46,9 @@ def x_at_y(*, y: float, center_x: float, top_width: float,
 def main() -> None:
     Path("output").mkdir(exist_ok=True)
 
-    dwg = svgwrite.Drawing(OUTPUT, size=(WIDTH, HEIGHT),
-                           viewBox=f"0 0 {WIDTH} {HEIGHT}")
+    dwg = svgwrite.Drawing(
+        OUTPUT, size=(WIDTH, HEIGHT), viewBox=f"0 0 {WIDTH} {HEIGHT}"
+    )
     dwg.add(dwg.rect(insert=(0, 0), size=(WIDTH, HEIGHT), fill="white"))
 
     num = len(LAYERS)
@@ -63,15 +72,33 @@ def main() -> None:
             (cx + w_bot / 2, y_bot),
             (cx - w_bot / 2, y_bot),
         ]
-        dwg.add(dwg.polygon(points, fill=fill, stroke="white", stroke_width=2,
-                             fill_opacity=0.9))
-        dwg.add(dwg.text(label, insert=(cx, y_top + layer_h / 2 + 5),
-                         text_anchor="middle", font_size="16px",
-                         font_weight="bold", font_family=FONT, fill=text_color))
+        dwg.add(
+            dwg.polygon(
+                points, fill=fill, stroke="white", stroke_width=2, fill_opacity=0.9
+            )
+        )
+        dwg.add(
+            dwg.text(
+                label,
+                insert=(cx, y_top + layer_h / 2 + 5),
+                text_anchor="middle",
+                font_size="16px",
+                font_weight="bold",
+                font_family=FONT,
+                fill=text_color,
+            )
+        )
 
-    dwg.add(dwg.text("Testing Pyramid", insert=(cx, HEIGHT - 5),
-                     text_anchor="middle", font_size="12px",
-                     font_family=FONT, fill="#666"))
+    dwg.add(
+        dwg.text(
+            "Testing Pyramid",
+            insert=(cx, HEIGHT - 5),
+            text_anchor="middle",
+            font_size="12px",
+            font_family=FONT,
+            fill="#666",
+        )
+    )
 
     dwg.save()
     print(f"Saved: {OUTPUT}")

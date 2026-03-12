@@ -12,6 +12,7 @@ Requires graphviz system binary:
 
 Run: uv run cloud-arch-diagrams.py
 """
+
 from pathlib import Path
 
 from diagrams import Cluster, Diagram

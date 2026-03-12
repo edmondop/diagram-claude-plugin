@@ -13,6 +13,7 @@ for new projects.
 
 Run: uv run sequence-seqdiag.py
 """
+
 from pathlib import Path
 from textwrap import dedent
 

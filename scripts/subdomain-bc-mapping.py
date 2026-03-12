@@ -15,6 +15,7 @@ Patterns visible at a glance:
 
 Run: uv run subdomain-bc-mapping.py
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -66,6 +67,7 @@ FONT = "Helvetica, Arial, sans-serif"
 
 # ── Data ──────────────────────────────────────────────────────────
 
+
 @dataclass
 class SubdomainGroup:
     name: str
@@ -73,22 +75,34 @@ class SubdomainGroup:
 
 
 GROUPS = [
-    SubdomainGroup("Order Management", [
-        "Order Fulfillment",
-        "Inventory Management",
-        "Shipping & Logistics",
-    ]),
-    SubdomainGroup("Commerce", [
-        "Product Catalog",
-        "Pricing & Promotions",
-    ]),
-    SubdomainGroup("Customer Experience", [
-        "Customer Management",
-        "Returns & Refunds",
-    ]),
-    SubdomainGroup("Financial Operations", [
-        "Payment Processing",
-    ]),
+    SubdomainGroup(
+        "Order Management",
+        [
+            "Order Fulfillment",
+            "Inventory Management",
+            "Shipping & Logistics",
+        ],
+    ),
+    SubdomainGroup(
+        "Commerce",
+        [
+            "Product Catalog",
+            "Pricing & Promotions",
+        ],
+    ),
+    SubdomainGroup(
+        "Customer Experience",
+        [
+            "Customer Management",
+            "Returns & Refunds",
+        ],
+    ),
+    SubdomainGroup(
+        "Financial Operations",
+        [
+            "Payment Processing",
+        ],
+    ),
 ]
 
 BOUNDED_CONTEXTS = [
@@ -133,17 +147,21 @@ class Annotation:
 
 ANNOTATIONS = [
     Annotation(
-        ["N:1 — Two subdomains merged",
-         "into one BC. Risk of coupled,",
-         "tangled logic across concerns."],
+        [
+            "N:1 — Two subdomains merged",
+            "into one BC. Risk of coupled,",
+            "tangled logic across concerns.",
+        ],
         "bad",
         "Warehouse Management",
     ),
     Annotation(
-        ["1:N — One subdomain split into",
-         "focused systems. Independent teams",
-         "can evolve pricing and campaigns",
-         "at different speeds."],
+        [
+            "1:N — One subdomain split into",
+            "focused systems. Independent teams",
+            "can evolve pricing and campaigns",
+            "at different speeds.",
+        ],
         "good",
         "Pricing",
         y_nudge=14,
@@ -152,6 +170,7 @@ ANNOTATIONS = [
 
 
 # ── Geometry: compute positions ───────────────────────────────────
+
 
 @dataclass
 class BoxPos:
@@ -183,12 +202,19 @@ def _compute_left_layout() -> tuple[dict[str, BoxPos], list[tuple[str, BoxPos]]]
 
         for child in group.children:
             sd_pos[child] = BoxPos(
-                LEFT_X + GROUP_PAD_X, inner_y,
-                INNER_BOX_W, INNER_BOX_H,
+                LEFT_X + GROUP_PAD_X,
+                inner_y,
+                INNER_BOX_W,
+                INNER_BOX_H,
             )
             inner_y += INNER_BOX_H + INNER_GAP
 
-        group_h = GROUP_PAD_TOP + len(group.children) * (INNER_BOX_H + INNER_GAP) - INNER_GAP + GROUP_PAD_BOTTOM
+        group_h = (
+            GROUP_PAD_TOP
+            + len(group.children) * (INNER_BOX_H + INNER_GAP)
+            - INNER_GAP
+            + GROUP_PAD_BOTTOM
+        )
         group_rects.append((group.name, BoxPos(LEFT_X, group_top, group_w, group_h)))
         cursor_y += group_h + GROUP_GAP
 
@@ -207,12 +233,15 @@ def _compute_right_layout(
     start_y = TOP_PADDING + (left_total_h - total_bc_h) / 2
 
     for i, name in enumerate(BOUNDED_CONTEXTS):
-        bc_pos[name] = BoxPos(right_x, start_y + i * (BC_BOX_H + BC_GAP), BC_BOX_W, BC_BOX_H)
+        bc_pos[name] = BoxPos(
+            right_x, start_y + i * (BC_BOX_H + BC_GAP), BC_BOX_W, BC_BOX_H
+        )
 
     return bc_pos
 
 
 # ── Drawing helpers ───────────────────────────────────────────────
+
 
 def _draw_rounded_rect(
     d: draw.Drawing,
@@ -224,8 +253,11 @@ def _draw_rounded_rect(
     stroke_dasharray: str | None = None,
 ) -> None:
     kwargs: dict = dict(
-        rx=CORNER_R, ry=CORNER_R,
-        fill=fill, stroke=stroke, stroke_width=stroke_width,
+        rx=CORNER_R,
+        ry=CORNER_R,
+        fill=fill,
+        stroke=stroke,
+        stroke_width=stroke_width,
     )
     if stroke_dasharray:
         kwargs["stroke_dasharray"] = stroke_dasharray
@@ -243,29 +275,41 @@ def _draw_label(
     weight: str = "bold",
     anchor: str = "middle",
 ) -> None:
-    d.append(draw.Text(
-        text, size, x, y,
-        fill=color, text_anchor=anchor,
-        font_family=FONT, font_weight=weight,
-    ))
+    d.append(
+        draw.Text(
+            text,
+            size,
+            x,
+            y,
+            fill=color,
+            text_anchor=anchor,
+            font_family=FONT,
+            font_weight=weight,
+        )
+    )
 
 
 def _draw_curve(
     d: draw.Drawing,
     *,
-    x1: float, y1: float,
-    x2: float, y2: float,
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
     color: str,
     thickness: float,
 ) -> None:
     ctrl_x = (x1 + x2) / 2
-    p = draw.Path(fill="none", stroke=color, stroke_width=thickness, stroke_opacity=0.55)
+    p = draw.Path(
+        fill="none", stroke=color, stroke_width=thickness, stroke_opacity=0.55
+    )
     p.M(x1, y1)
     p.C(ctrl_x, y1, ctrl_x, y2, x2, y2)
     d.append(p)
 
 
 # ── Main ──────────────────────────────────────────────────────────
+
 
 def main() -> None:
     Path("output").mkdir(exist_ok=True)
@@ -293,17 +337,47 @@ def main() -> None:
     right_cx = list(bc_pos.values())[0].x + BC_BOX_W / 2
 
     _draw_label(d, "Problem Space", x=left_cx, y=30, size=20, color=HEADING_COLOR)
-    _draw_label(d, "(Subdomains)", x=left_cx, y=50, size=12, color=ANNOTATION_COLOR, weight="normal")
+    _draw_label(
+        d,
+        "(Subdomains)",
+        x=left_cx,
+        y=50,
+        size=12,
+        color=ANNOTATION_COLOR,
+        weight="normal",
+    )
     _draw_label(d, "Solution Space", x=right_cx, y=30, size=20, color=HEADING_COLOR)
-    _draw_label(d, "(Bounded Contexts / Distinct Systems)", x=right_cx, y=50, size=12, color=ANNOTATION_COLOR, weight="normal")
+    _draw_label(
+        d,
+        "(Bounded Contexts / Distinct Systems)",
+        x=right_cx,
+        y=50,
+        size=12,
+        color=ANNOTATION_COLOR,
+        weight="normal",
+    )
 
     # ── Draw subdomain groups ─────────────────────────────────────
     for gi, (gname, gpos) in enumerate(group_rects):
         ci = gi % len(GROUP_FILLS)
-        _draw_rounded_rect(d, gpos, fill=GROUP_FILLS[ci], stroke=GROUP_BORDERS[ci],
-                           stroke_width=1.8, stroke_dasharray="6,3")
-        _draw_label(d, gname, x=gpos.x + 12, y=gpos.y + 22,
-                    size=12, color=GROUP_BORDERS[ci], weight="bold", anchor="start")
+        _draw_rounded_rect(
+            d,
+            gpos,
+            fill=GROUP_FILLS[ci],
+            stroke=GROUP_BORDERS[ci],
+            stroke_width=1.8,
+            stroke_dasharray="6,3",
+        )
+        _draw_label(
+            d,
+            gname,
+            x=gpos.x + 12,
+            y=gpos.y + 22,
+            size=12,
+            color=GROUP_BORDERS[ci],
+            weight="bold",
+            anchor="start",
+        )
 
     # ── Draw inner subdomain boxes ────────────────────────────────
     # map each subdomain to its group's border color for a tinted left accent
@@ -317,18 +391,27 @@ def main() -> None:
         _draw_rounded_rect(d, pos, fill=INNER_FILL, stroke=accent, stroke_width=1.8)
         # colored left accent bar
         bar_h = pos.h - 12
-        d.append(draw.Rectangle(
-            pos.x + 1, pos.y + 6, 4, bar_h,
-            rx=2, ry=2, fill=accent,
-        ))
-        _draw_label(d, name, x=pos.x + pos.w / 2 + 4, y=pos.cy + 5,
-                    size=12.5, color=INNER_TEXT)
+        d.append(
+            draw.Rectangle(
+                pos.x + 1,
+                pos.y + 6,
+                4,
+                bar_h,
+                rx=2,
+                ry=2,
+                fill=accent,
+            )
+        )
+        _draw_label(
+            d, name, x=pos.x + pos.w / 2 + 4, y=pos.cy + 5, size=12.5, color=INNER_TEXT
+        )
 
     # ── Draw BC boxes ─────────────────────────────────────────────
     for name, pos in bc_pos.items():
         _draw_rounded_rect(d, pos, fill=BC_FILL, stroke=BC_BORDER, stroke_width=1.6)
-        _draw_label(d, name, x=pos.x + pos.w / 2, y=pos.cy + 5,
-                    size=12.5, color=BC_TEXT)
+        _draw_label(
+            d, name, x=pos.x + pos.w / 2, y=pos.cy + 5, size=12.5, color=BC_TEXT
+        )
 
     # ── Draw connection curves ────────────────────────────────────
     color_map = {"normal": BAND_NORMAL, "good": BAND_GOOD, "bad": BAND_BAD}
@@ -337,11 +420,15 @@ def main() -> None:
     for m in MAPPINGS:
         sp = sd_pos[m.subdomain]
         bp = bc_pos[m.bounded_context]
-        _draw_curve(d,
-                    x1=sp.right, y1=sp.cy,
-                    x2=bp.x, y2=bp.cy,
-                    color=color_map[m.pattern],
-                    thickness=thickness_map[m.pattern])
+        _draw_curve(
+            d,
+            x1=sp.right,
+            y1=sp.cy,
+            x2=bp.x,
+            y2=bp.cy,
+            color=color_map[m.pattern],
+            thickness=thickness_map[m.pattern],
+        )
 
     # ── Draw annotations ──────────────────────────────────────────
     for ann in ANNOTATIONS:
@@ -356,17 +443,41 @@ def main() -> None:
         pill_y = start_y - line_h + 1
         ann_color = color_map[ann.pattern]
 
-        _draw_rounded_rect(d, BoxPos(ax - 8, pill_y - 3, pill_w, pill_h),
-                           fill=ann_color, stroke=ann_color, stroke_width=1.0)
+        _draw_rounded_rect(
+            d,
+            BoxPos(ax - 8, pill_y - 3, pill_w, pill_h),
+            fill=ann_color,
+            stroke=ann_color,
+            stroke_width=1.0,
+        )
         # override fill opacity via a white underlay + transparent colored overlay
-        d.append(draw.Rectangle(ax - 8, pill_y - 3, pill_w, pill_h,
-                                rx=CORNER_R, ry=CORNER_R,
-                                fill=BG_COLOR, fill_opacity=0.92,
-                                stroke=ann_color, stroke_width=1.0, stroke_opacity=0.3))
+        d.append(
+            draw.Rectangle(
+                ax - 8,
+                pill_y - 3,
+                pill_w,
+                pill_h,
+                rx=CORNER_R,
+                ry=CORNER_R,
+                fill=BG_COLOR,
+                fill_opacity=0.92,
+                stroke=ann_color,
+                stroke_width=1.0,
+                stroke_opacity=0.3,
+            )
+        )
 
         for j, line in enumerate(ann.lines):
-            _draw_label(d, line, x=ax, y=start_y + j * line_h,
-                        size=11, color=ann_color, weight="600", anchor="start")
+            _draw_label(
+                d,
+                line,
+                x=ax,
+                y=start_y + j * line_h,
+                size=11,
+                color=ann_color,
+                weight="600",
+                anchor="start",
+            )
 
     # ── Legend ─────────────────────────────────────────────────────
     legend_y = height - 30
@@ -378,10 +489,27 @@ def main() -> None:
 
     lx = LEFT_X
     for label, color in legend_items:
-        d.append(draw.Line(lx, legend_y, lx + 30, legend_y,
-                           stroke=color, stroke_width=3, stroke_opacity=0.6))
-        _draw_label(d, label, x=lx + 38, y=legend_y + 4,
-                    size=11, color=ANNOTATION_COLOR, weight="normal", anchor="start")
+        d.append(
+            draw.Line(
+                lx,
+                legend_y,
+                lx + 30,
+                legend_y,
+                stroke=color,
+                stroke_width=3,
+                stroke_opacity=0.6,
+            )
+        )
+        _draw_label(
+            d,
+            label,
+            x=lx + 38,
+            y=legend_y + 4,
+            size=11,
+            color=ANNOTATION_COLOR,
+            weight="normal",
+            anchor="start",
+        )
         lx += 260
 
     d.save_svg(OUTPUT)

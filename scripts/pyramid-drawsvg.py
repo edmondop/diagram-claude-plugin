@@ -9,6 +9,7 @@ No system dependencies required.
 
 Run: uv run pyramid-drawsvg.py
 """
+
 from pathlib import Path
 
 import drawsvg as draw
@@ -19,10 +20,10 @@ PADDING = 20
 OUTPUT = "output/pyramid-drawsvg.svg"
 
 LAYERS: list[tuple[str, str, str]] = [
-    ("E2E Tests",         "#e74c3c", "white"),
+    ("E2E Tests", "#e74c3c", "white"),
     ("Integration Tests", "#e67e22", "white"),
-    ("Component Tests",   "#3498db", "white"),
-    ("Unit Tests",        "#2ecc71", "white"),
+    ("Component Tests", "#3498db", "white"),
+    ("Unit Tests", "#2ecc71", "white"),
 ]
 
 
@@ -55,17 +56,30 @@ def main() -> None:
         p.Z()
         d.append(p)
 
-        d.append(draw.Text(
-            label, 16, cx, y_top + layer_h / 2 + 6,
-            fill=text_color, text_anchor="middle",
-            font_weight="bold", font_family="Helvetica, Arial, sans-serif",
-        ))
+        d.append(
+            draw.Text(
+                label,
+                16,
+                cx,
+                y_top + layer_h / 2 + 6,
+                fill=text_color,
+                text_anchor="middle",
+                font_weight="bold",
+                font_family="Helvetica, Arial, sans-serif",
+            )
+        )
 
-    d.append(draw.Text(
-        "Testing Pyramid", 12, cx, HEIGHT - 5,
-        fill="#666", text_anchor="middle",
-        font_family="Helvetica, Arial, sans-serif",
-    ))
+    d.append(
+        draw.Text(
+            "Testing Pyramid",
+            12,
+            cx,
+            HEIGHT - 5,
+            fill="#666",
+            text_anchor="middle",
+            font_family="Helvetica, Arial, sans-serif",
+        )
+    )
 
     d.save_svg(OUTPUT)
     print(f"Saved: {OUTPUT}")

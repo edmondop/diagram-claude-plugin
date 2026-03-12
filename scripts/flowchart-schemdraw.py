@@ -9,6 +9,7 @@ No system dependencies required.
 
 Run: uv run flowchart-schemdraw.py
 """
+
 from pathlib import Path
 
 import schemdraw

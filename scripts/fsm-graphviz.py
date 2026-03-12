@@ -12,6 +12,7 @@ Requires graphviz system binary:
 
 Run: uv run fsm-graphviz.py
 """
+
 from pathlib import Path
 
 import graphviz
@@ -65,20 +66,33 @@ def main() -> None:
 
     dot.edge("start", "pending", label="create_order()")
     dot.edge("pending", "confirmed", label="payment_ok")
-    dot.edge("pending", "cancelled", label="timeout",
-             color="#D32F2F", fontcolor="#D32F2F")
+    dot.edge(
+        "pending", "cancelled", label="timeout", color="#D32F2F", fontcolor="#D32F2F"
+    )
     dot.edge("confirmed", "processing", label="warehouse_ack")
-    dot.edge("confirmed", "cancelled", label="fraud_detected",
-             style="dashed", color="#D32F2F", fontcolor="#D32F2F")
+    dot.edge(
+        "confirmed",
+        "cancelled",
+        label="fraud_detected",
+        style="dashed",
+        color="#D32F2F",
+        fontcolor="#D32F2F",
+    )
     dot.edge("processing", "shipped", label="tracking_assigned")
     dot.edge("shipped", "delivered", label="delivery_confirmed")
-    dot.edge("shipped", "processing", label="returned",
-             style="dotted", constraint="false")
-    dot.edge("delivered", "refunded", label="refund_requested",
-             style="dashed", color="#FF9800", fontcolor="#FF9800")
+    dot.edge(
+        "shipped", "processing", label="returned", style="dotted", constraint="false"
+    )
+    dot.edge(
+        "delivered",
+        "refunded",
+        label="refund_requested",
+        style="dashed",
+        color="#FF9800",
+        fontcolor="#FF9800",
+    )
 
-    output_path = dot.render(filename="fsm-graphviz",
-                             directory="output", cleanup=True)
+    output_path = dot.render(filename="fsm-graphviz", directory="output", cleanup=True)
     print(f"Saved: {output_path}")
 
 
