@@ -12,6 +12,7 @@ Requires graphviz system binary:
 
 Run: uv run network-graphviz.py
 """
+
 from pathlib import Path
 
 import graphviz
@@ -48,15 +49,25 @@ def main() -> None:
     )
 
     for name in ["core1", "core2"]:
-        dot.node(name, label=name.replace("core", "Core "),
-                 shape="hexagon", fillcolor="#EF5350",
-                 fontcolor="white", width="1.4")
+        dot.node(
+            name,
+            label=name.replace("core", "Core "),
+            shape="hexagon",
+            fillcolor="#EF5350",
+            fontcolor="white",
+            width="1.4",
+        )
     dot.edge("core1", "core2", label="10 Gbps", penwidth="3", color="#D32F2F")
 
     for sw in ["dist_a", "dist_b", "dist_c"]:
-        dot.node(sw, label=sw.replace("dist_", "Switch ").upper(),
-                 shape="box", fillcolor="#42A5F5",
-                 fontcolor="white", style="filled,rounded")
+        dot.node(
+            sw,
+            label=sw.replace("dist_", "Switch ").upper(),
+            shape="box",
+            fillcolor="#42A5F5",
+            fontcolor="white",
+            style="filled,rounded",
+        )
         dot.edge(sw, "core1", penwidth="2", color="#1976D2")
         dot.edge(sw, "core2", penwidth="2", color="#1976D2", style="dashed")
 
@@ -70,14 +81,20 @@ def main() -> None:
     for switch, nodes in servers.items():
         for srv in nodes:
             prefix = srv.rstrip("0123456789")
-            dot.node(srv, label=srv, shape="ellipse",
-                     fillcolor=colors.get(prefix, "#BDBDBD"), fontcolor="white")
+            dot.node(
+                srv,
+                label=srv,
+                shape="ellipse",
+                fillcolor=colors.get(prefix, "#BDBDBD"),
+                fontcolor="white",
+            )
             dot.edge(switch, srv)
 
     dot.edge("db1", "db2", label="replication", style="dotted", color="#7B1FA2")
 
-    output_path = dot.render(filename="network-graphviz",
-                             directory="output", cleanup=True)
+    output_path = dot.render(
+        filename="network-graphviz", directory="output", cleanup=True
+    )
     print(f"Saved: {output_path}")
 
 

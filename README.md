@@ -51,15 +51,15 @@ sudo dnf install graphviz
 
 Use the `/diagram` slash command or just ask Claude to draw something:
 
-```
+```text
 /diagram authentication flow for a web app
 ```
 
-```
+```text
 Draw me an ERD for an e-commerce system with users, orders, and products
 ```
 
-```
+```text
 Create a cloud architecture diagram showing an AWS setup with ECS, RDS, and ElastiCache
 ```
 

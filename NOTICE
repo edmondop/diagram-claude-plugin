@@ -1,0 +1,10 @@
+diagram-claude-plugin
+Copyright 2026 Edmondo Porcu
+
+This product includes the Excalidraw diagramming skill originally developed
+by Tenzir GmbH (https://tenzir.com/), adapted from:
+
+  https://github.com/tenzir/claude-plugins
+
+Licensed under the Apache License, Version 2.0.
+See skills/excalidraw/ for the adapted files.

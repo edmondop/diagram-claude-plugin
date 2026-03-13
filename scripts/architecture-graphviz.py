@@ -12,6 +12,7 @@ Requires graphviz system binary:
 
 Run: uv run architecture-graphviz.py
 """
+
 from pathlib import Path
 
 import graphviz
@@ -48,31 +49,55 @@ def main() -> None:
     )
 
     with dot.subgraph(name="cluster_frontend") as c:
-        c.attr(label="Frontend Tier", style="filled,rounded",
-               color="#2196F3", fillcolor="#E3F2FD",
-               fontcolor="#1565C0", fontsize="12", penwidth="2")
+        c.attr(
+            label="Frontend Tier",
+            style="filled,rounded",
+            color="#2196F3",
+            fillcolor="#E3F2FD",
+            fontcolor="#1565C0",
+            fontsize="12",
+            penwidth="2",
+        )
         c.node("web_app", label="React SPA", fillcolor="#BBDEFB")
         c.node("mobile_bff", label="Mobile BFF", fillcolor="#BBDEFB")
 
     with dot.subgraph(name="cluster_gateway") as c:
-        c.attr(label="API Gateway", style="filled,rounded",
-               color="#FF9800", fillcolor="#FFF3E0",
-               fontcolor="#E65100", fontsize="12", penwidth="2")
+        c.attr(
+            label="API Gateway",
+            style="filled,rounded",
+            color="#FF9800",
+            fillcolor="#FFF3E0",
+            fontcolor="#E65100",
+            fontsize="12",
+            penwidth="2",
+        )
         c.node("gateway", label="Kong Gateway", fillcolor="#FFE0B2")
         c.node("auth", label="Auth Service", fillcolor="#FFE0B2")
 
     with dot.subgraph(name="cluster_backend") as c:
-        c.attr(label="Backend Services", style="filled,rounded",
-               color="#4CAF50", fillcolor="#E8F5E9",
-               fontcolor="#2E7D32", fontsize="12", penwidth="2")
+        c.attr(
+            label="Backend Services",
+            style="filled,rounded",
+            color="#4CAF50",
+            fillcolor="#E8F5E9",
+            fontcolor="#2E7D32",
+            fontsize="12",
+            penwidth="2",
+        )
         c.node("user_svc", label="User Service", fillcolor="#C8E6C9")
         c.node("order_svc", label="Order Service", fillcolor="#C8E6C9")
         c.node("payment_svc", label="Payment Service", fillcolor="#C8E6C9")
 
     with dot.subgraph(name="cluster_data") as c:
-        c.attr(label="Data Layer", style="filled,rounded",
-               color="#9C27B0", fillcolor="#F3E5F5",
-               fontcolor="#6A1B9A", fontsize="12", penwidth="2")
+        c.attr(
+            label="Data Layer",
+            style="filled,rounded",
+            color="#9C27B0",
+            fillcolor="#F3E5F5",
+            fontcolor="#6A1B9A",
+            fontsize="12",
+            penwidth="2",
+        )
         c.node("postgres", label="PostgreSQL", shape="cylinder", fillcolor="#CE93D8")
         c.node("redis", label="Redis Cache", shape="cylinder", fillcolor="#CE93D8")
         c.node("kafka", label="Kafka", shape="hexagon", fillcolor="#CE93D8")
@@ -88,8 +113,9 @@ def main() -> None:
     dot.edge("user_svc", "redis", style="dotted", label="cache")
     dot.edge("order_svc", "kafka", label="events")
 
-    output_path = dot.render(filename="architecture-graphviz",
-                             directory="output", cleanup=True)
+    output_path = dot.render(
+        filename="architecture-graphviz", directory="output", cleanup=True
+    )
     print(f"Saved: {output_path}")
 
 

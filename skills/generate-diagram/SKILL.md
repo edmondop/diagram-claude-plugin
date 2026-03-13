@@ -6,6 +6,8 @@ description: Use when generating diagrams, charts, or technical illustrations.
   "block diagram", "pyramid diagram", "DAG", "C4 diagram", "context map",
   "use case diagram", "activity diagram", "subdomain decomposition",
   or any request for visual/graphical output in SVG or PNG format.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+version: 0.1.0
 ---
 
 # Diagram Generation
@@ -33,6 +35,7 @@ inline scripts.
    > - Sequence diagram
    > - Network / DAG
    > - Block diagram
+   > - Excalidraw (editable, hand-drawn sketch style)
 
 2. **Pick the tool** from the routing table. For PlantUML types,
    do NOT offer Python alternatives — PlantUML is the only correct
@@ -99,7 +102,8 @@ inline scripts.
 | DAG (acyclic pipeline)   | svgwrite                  | graphviz                    | graphviz for auto-layout; svgwrite for precision   |
 | Block diagram            | grandalf + drawsvg        | blockdiag, schemdraw, draw.io | blockdiag for DSL; schemdraw for flow; draw.io for editable |
 | Subdomain → BC mapping   | drawsvg                   | --                            | `scripts/subdomain-bc-mapping.py` — bipartite layout        |
-| Any (editable output)    | draw.io (drawio skill)    | --                            | When user wants editable diagram they can modify in Draw.io |
+| Any (editable, sketch)   | Excalidraw (excalidraw skill) | --                        | Editable `.excalidraw` JSON with hand-drawn aesthetic       |
+| Any (editable, precise)  | draw.io (drawio skill)    | --                            | Editable diagram they can modify in Draw.io                 |
 
 ## Bounded Context Naming Rules
 

@@ -12,6 +12,7 @@ old versions of setuptools and Pillow.
 
 Run: uv run block-blockdiag.py
 """
+
 from pathlib import Path
 from textwrap import dedent
 
