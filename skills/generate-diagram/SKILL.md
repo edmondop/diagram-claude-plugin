@@ -270,6 +270,40 @@ nodes + edges + auto-layout.
 - Output: `dot.render(filename, directory, cleanup=True)` or `dot.pipe(encoding="utf-8")`
 - Example: `scripts/flowchart-graphviz.py`
 
+#### Graphviz Label & Layout Tips
+
+1. **Edge labels overlap arrows by default.** Pad labels with spaces to
+   shift them away from the arrow line:
+   ```python
+   dot.edge("a", "b", label="   HTTP   ")  # spaces push label right
+   ```
+   Graphviz centers labels on the edge midpoint. Leading/trailing spaces
+   shift the rendered text without affecting layout computation.
+
+2. **Cluster labels overlap node content when the cluster is narrow.**
+   Fix by padding the cluster label or setting a minimum margin:
+   ```python
+   c.attr(label="  Behavior  ", margin="20")
+   ```
+   This forces the cluster to be wider, giving the label room.
+
+3. **Use `compound=true` + `lhead`/`ltail` to point arrows at cluster
+   borders** instead of individual nodes inside them:
+   ```python
+   dot.attr(compound="true")
+   dot.edge("client", "api", lhead="cluster_backend")  # arrow stops at cluster border
+   ```
+
+4. **Force cluster ordering** with invisible edges between nodes in
+   different clusters:
+   ```python
+   dot.edge("node_in_cluster_a", "node_in_cluster_c", style="invis")
+   ```
+
+5. **Avoid long multi-line labels** on edges — they create large bounding
+   boxes that distort layout. Keep edge labels to 1-2 short lines max.
+   Move detailed descriptions into node labels or annotations instead.
+
 ### diagrams (pip: diagrams) -- REQUIRES SYSTEM BINARY
 
 Cloud/infra architecture with provider icon sets (AWS, GCP, K8s, Azure).
@@ -424,3 +458,11 @@ For diagrams that need precise coordinate control (pyramids, custom shapes):
 4. **Per-element nudges OK.** Add `y_nudge`/`x_nudge` to config when needed.
 5. **Keep the script in the repo** next to the output SVG.
 6. **Iterate visually.** Open the SVG, ask for feedback, adjust constants.
+7. **Edge labels must not overlap arrows.** When placing text near an
+   arrow, offset the label by at least 8-12px perpendicular to the arrow
+   direction. For horizontal arrows, place labels above (`my - 10`).
+   For vertical arrows, place labels to the right (`mx + 10`). Never
+   place a label at the exact midpoint of an arrow without an offset.
+8. **Container labels need breathing room.** When a cluster/group label
+   is short (e.g., "State"), pad the container with extra margin so the
+   label doesn't visually collide with the child nodes inside it.
