@@ -256,6 +256,54 @@ Use `@startwbs` with `<<inScope>>` to highlight the bounded context:
 4. **`skinparam ranksep 150`** — increase spacing between ranks
    for readability in use case diagrams.
 
+### PlantUML Sequence Diagram Tips
+
+1. **`ArrowFontSize` controls message labels**, not `MessageFontSize`.
+   The correct skinparam for sequence diagram arrow label font size:
+   ```plantuml
+   skinparam sequence {
+     ArrowFontSize 8
+   }
+   ```
+
+2. **`ParticipantPadding` controls horizontal spacing** between
+   participant lifelines. Increase to 40+ when long message labels
+   overlap adjacent lifeline bars.
+
+3. **Self-arrows (`A -> A`) extend below the activation bar** if the
+   bar doesn't have enough messages after the self-arrow. PlantUML
+   sizes activation bars based on messages within them. To extend a
+   bar past a self-arrow, add a message (labeled or unlabeled) from
+   the participant to another participant AFTER the self-arrow:
+   ```plantuml
+   activate WF
+   WF -> WF : await Signal
+   note right of WF
+     SUSPENDED
+   end note
+   WF --> TS : yield
+   deactivate WF
+   ```
+
+4. **The `...` delay syntax breaks ALL activation bars.** It creates
+   a gap in every active lifeline. If you need some bars to remain
+   continuous through a time gap, use `||N||` spacers with a note
+   instead:
+   ```plantuml
+   ||10||
+   note right of TS #white;line:white
+     <size:9><color:#888888>time passes</color></size>
+   end note
+   ||5||
+   ```
+   The `#white;line:white` makes the note box invisible — just
+   floating text.
+
+5. **Notes inherit skinparam styling.** To make a note appear as
+   plain floating text (no box), override both background and border
+   per-note with `#white;line:white`. The `#background;line:border`
+   syntax only works in multi-line note blocks, not inline `:` notes.
+
 ## Python Library Quick Reference
 
 ### graphviz (pip: graphviz) -- REQUIRES SYSTEM BINARY
@@ -466,3 +514,30 @@ For diagrams that need precise coordinate control (pyramids, custom shapes):
 8. **Container labels need breathing room.** When a cluster/group label
    is short (e.g., "State"), pad the container with extra margin so the
    label doesn't visually collide with the child nodes inside it.
+9. **Arrows to curved shapes need per-edge nudging.** When arrows target
+   elliptical shapes (cylinders, ellipses), the visual border varies by
+   where the arrow hits. Arrows hitting the side of an ellipse need more
+   inward nudge than arrows hitting the center. Compute separate
+   `target_top`/`target_bot` values and add 5-8px nudge toward the shape
+   center. Always render and visually verify — math alone won't match
+   perception.
+10. **Labels on vertical arrows go to the side, not centered.** A label
+    centered on a vertical arrow's midpoint sits directly on the line.
+    Use `label_dx=±40` to push it left or right. For diagonal arrows,
+    offset labels perpendicular to the line with both `label_dx` and
+    `label_dy` — typically 15-20px in each direction.
+11. **svgwrite `style=""` (empty string) is invalid.** When building
+    optional style attributes (e.g., dashed lines), use a dict and only
+    add the `style` key when the value is non-empty:
+    ```python
+    extra = {"style": "stroke-dasharray:4,3"} if dashed else {}
+    dwg.add(dwg.line(..., **extra))
+    ```
+12. **Cylinder shapes need generous height.** A cylinder's top ellipse
+    overlaps the label text if `ry` is too small or the body too short.
+    Use `ry >= 10` and `h >= 70` for readable cylinders. Place the label
+    text below center (`cy + 2`) to clear the top ellipse lid.
+13. **Symmetry through equal spacing.** In multi-row layouts, ensure the
+    vertical gap between the center element and the rows above/below it
+    is roughly equal. Visually verify and adjust — the bottom row often
+    needs to be pushed 10-20px further down than the math suggests.
