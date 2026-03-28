@@ -98,6 +98,8 @@ inline scripts.
 | Cloud/infra architecture | diagrams (mingrammer)     | graphviz                    | Don't need cloud provider icons                    |
 | Pyramid / stacked layers | svgwrite                  | drawsvg                     | Prefer cleaner API, less precise control needed    |
 | Sequence diagram         | seqdiag                   | svgwrite                    | seqdiag for speed; svgwrite for full control       |
+| FSM / state machine (custom) | graphviz              | PlantUML (preferred for UML) | Use graphviz when PlantUML unavailable or when embedding in notebooks via SVG pipe |
+| Memory layout / byte-level  | matplotlib             | svgwrite                    | matplotlib for annotated 2D layouts with arrows; svgwrite for static SVGs          |
 | Network / graph (cyclic) | networkx + matplotlib     | grandalf + drawsvg          | Pure Python auto-layout without matplotlib         |
 | DAG (acyclic pipeline)   | svgwrite                  | graphviz                    | graphviz for auto-layout; svgwrite for precision   |
 | Block diagram            | grandalf + drawsvg        | blockdiag, schemdraw, draw.io | blockdiag for DSL; schemdraw for flow; draw.io for editable |
@@ -304,6 +306,40 @@ Use `@startwbs` with `<<inScope>>` to highlight the bounded context:
    per-note with `#white;line:white`. The `#background;line:border`
    syntax only works in multi-line note blocks, not inline `:` notes.
 
+## Embedding Diagrams in Notebooks (marimo, Jupyter)
+
+When generating diagrams inside interactive notebooks rather than as
+standalone scripts, prefer **pre-rendering to a file and embedding the
+image** over generating dynamically in a cell. Dynamic generation makes
+iteration painful — you can't see intermediate results, errors are
+opaque, and layout tuning requires full re-execution.
+
+If you must generate inline:
+
+1. **graphviz SVG pipe** is the most reliable approach for node+edge
+   diagrams. Render to SVG string and embed in the notebook's HTML
+   output:
+   ```python
+   import graphviz
+   g = graphviz.Digraph(format="svg")
+   g.attr(bgcolor="white", rankdir="TB", fontname="Helvetica")
+   # ... build graph ...
+   svg = g.pipe(format="svg").decode("utf-8")
+   # In marimo: mo.md(f"...{svg}...")
+   # In Jupyter: from IPython.display import SVG, display; display(SVG(svg))
+   ```
+
+2. **matplotlib for memory layouts and coordinate-precise diagrams.**
+   Use matplotlib when you need exact control over rectangle positions,
+   byte-level addresses, and pointer arrows — things auto-layout tools
+   can't express.
+
+3. **Do NOT use matplotlib for state machines, flowcharts, or anything
+   with nodes + edges.** Manual circle/arrow positioning in matplotlib
+   is fragile — zorder bugs, arrow routing conflicts, and text
+   centering all require tedious manual tuning. Use graphviz or
+   PlantUML instead, which handle layout automatically.
+
 ## Python Library Quick Reference
 
 ### graphviz (pip: graphviz) -- REQUIRES SYSTEM BINARY
@@ -426,6 +462,37 @@ Graph-theory layouts. Best for DAGs with `topological_generations` +
 - `fig.savefig("file.svg", format="svg", bbox_inches="tight")`
 - Use `matplotlib.use("Agg")` before importing pyplot in scripts
 - Example: `scripts/network-networkx.py`
+
+#### matplotlib Pitfalls (applies to any matplotlib diagram)
+
+1. **zorder: patches paint over text.** `plt.Circle`, `FancyBboxPatch`,
+   and other patches default to zorder ~1-2, but text defaults to ~3.
+   If you set a patch to a high zorder (e.g., `zorder=5`), it will
+   cover text at the default zorder. **Always set text zorder higher
+   than any overlapping patch.** For example, if circles are at
+   `zorder=5`, set labels inside them to `zorder=10`.
+   ```python
+   ax.add_patch(plt.Circle((x, y), r, zorder=5, ...))
+   ax.text(x, y, "State0", zorder=10, ha="center", va="center")
+   ```
+
+2. **FancyArrowPatch arc direction.** `connectionstyle="arc3,rad=X"`:
+   positive `rad` curves left/above (relative to source→target
+   direction), negative curves right/below. Use negative rad to route
+   arrows below content they would otherwise cover. For example, an
+   arrow that would cross a label can be routed around it:
+   ```python
+   arrow = FancyArrowPatch(posA, posB,
+       connectionstyle="arc3,rad=-0.35",  # curves below
+       ...)
+   ```
+
+3. **Don't use matplotlib for node+edge diagrams.** State machines,
+   flowcharts, and architecture diagrams require manual positioning
+   of every circle, box, and arrow. Each layout change cascades into
+   coordinate recalculations. Use graphviz or PlantUML instead — they
+   handle layout automatically and produce cleaner results with less
+   code.
 
 ### erdantic (pip: erdantic) -- REQUIRES SYSTEM BINARY (graphviz)
 
