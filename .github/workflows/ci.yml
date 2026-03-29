@@ -75,16 +75,16 @@ jobs:
           count=$(ls scripts/output/*.svg scripts/output/*.png 2>/dev/null | wc -l)
           echo "Generated $count output files"
           ls -la scripts/output/
-          if [ "$count" -lt 17 ]; then
-            echo "Expected at least 17 output files, got $count"
+          if [ "$count" -lt 18 ]; then
+            echo "Expected at least 18 output files, got $count"
             exit 1
           fi
       - name: Check output files match committed versions
         run: |
-          # Matplotlib SVG output contains architecture-dependent float
-          # coordinates (ARM vs x86_64), so we only warn on those diffs.
-          # Graphviz/svgwrite outputs are fully deterministic in this container.
-          MATPLOTLIB_OUTPUTS="memory-layout-matplotlib.svg network-networkx.svg"
+          # Matplotlib outputs have architecture-dependent float coordinates.
+          # PlantUML outputs are rendered by a remote server whose version
+          # may change. Both are warned but not failed.
+          NONDETERMINISTIC="memory-layout-matplotlib.svg network-networkx.svg erd-plantuml.svg"
 
           untracked=$(git ls-files --others --exclude-standard scripts/output/)
           if [ -n "$untracked" ]; then
@@ -98,8 +98,8 @@ jobs:
           strict_failures=""
           for f in $changed; do
             base=$(basename "$f")
-            if echo "$MATPLOTLIB_OUTPUTS" | grep -qw "$base"; then
-              echo "::warning::$f differs (matplotlib arch-dependent floats — OK)"
+            if echo "$NONDETERMINISTIC" | grep -qw "$base"; then
+              echo "::warning::$f differs (non-deterministic output — OK)"
             else
               strict_failures="$strict_failures $f"
             fi

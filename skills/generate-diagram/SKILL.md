@@ -355,10 +355,11 @@ nodes + edges + auto-layout.
 - `graphviz.Digraph` (directed) / `graphviz.Graph` (undirected)
 - Engines: `dot` (hierarchical), `neato` (force-directed), `circo` (circular)
 - Clusters via `with dot.subgraph(name="cluster_xxx"):`
-- Record nodes for ERDs: `shape="record"`, `<port> field` syntax
+- HTML table labels for ERDs: `shape="plain"` with `<<TABLE>>` labels (see ERD section)
+- Record nodes for simple labeled nodes: `shape="record"`, `<port> field` syntax
 - Output: `dot.render(filename, directory, cleanup=True)` or `dot.pipe(encoding="utf-8")`
-- Example: `scripts/flowchart-graphviz.py`, `scripts/layered-dag-graphviz.py`,
-  `scripts/cluster-comparison-graphviz.py`
+- Example: `scripts/flowchart-graphviz.py`, `scripts/erd-graphviz.py`,
+  `scripts/layered-dag-graphviz.py`, `scripts/cluster-comparison-graphviz.py`
 
 #### Graphviz Label & Layout Tips
 
@@ -425,7 +426,9 @@ nodes + edges + auto-layout.
 Cloud/infra architecture with provider icon sets (AWS, GCP, K8s, Azure).
 41k GitHub stars.
 
-- `with Diagram(name, outformat="svg", show=False):`
+- `with Diagram(name, outformat="png", show=False):`
+  **Use `outformat="png"`, not `"svg"`.** SVG output embeds absolute local
+  paths to PNG icon files, making it non-portable.
 - `with Cluster("name"):` for grouping
 - Operators: `>>` (connect), `-` (undirected)
 - Supports SVG, PNG, PDF, JPG output
@@ -532,6 +535,72 @@ Graph-theory layouts. Best for DAGs with `topological_generations` +
    side-by-side boxes — especially when labels are long. Use two-row
    grids inside each box when showing many items, rather than one
    cramped horizontal line. Bump font to 10pt+ for readability.
+
+## ERD Best Practices
+
+**PlantUML is the preferred tool for ERDs.** Its native `entity` syntax
+produces clean, professional ERDs with minimal markup — PK/FK separators,
+crow's foot notation, and annotation notes all built in. Use PlantUML
+whenever available (local binary or public server).
+
+### PlantUML ERD (preferred)
+
+```plantuml
+entity "User" as user {
+  * id : UUID <<PK>>
+  --
+  * email : VARCHAR
+  * name : VARCHAR
+}
+
+entity "Order" as order {
+  * id : UUID <<PK>>
+  --
+  * user_id : UUID <<FK>>
+  * status : ENUM
+}
+
+user ||--o{ order : "places"
+```
+
+Key features:
+- `*` marks required (non-nullable) fields
+- `--` separates PK section from regular fields
+- `<<PK>>`, `<<FK>>` stereotypes render as badges
+- `||--o{` = one-to-many, `||--||` = one-to-one, `}o--o{` = many-to-many
+- `note right of entity` for annotations
+- Server rendering (no Java needed): `scripts/erd-plantuml.py`
+
+### Graphviz ERD (fallback when PlantUML unavailable)
+
+Use HTML-like TABLE labels with `shape="plain"` — NOT record shapes
+with `rankdir="LR"` which spread fields horizontally into unreadable
+wide tables.
+
+```python
+def _table(name, *, header_bg, fields):
+    rows = []
+    for badge, fname, ftype in fields:
+        badge_cell = f'<TD ALIGN="LEFT"><FONT COLOR="#888888"><B>{badge}</B></FONT></TD>' if badge else "<TD></TD>"
+        rows.append(f"<TR>{badge_cell}<TD ALIGN=\"LEFT\">{fname}</TD>"
+                    f"<TD ALIGN=\"LEFT\"><FONT COLOR=\"#888888\">{ftype}</FONT></TD></TR>")
+    return (f"<<TABLE BORDER='1' CELLBORDER='1' CELLSPACING='0' CELLPADDING='4' COLOR='#888888'>"
+            f"<TR><TD COLSPAN='3' BGCOLOR='{header_bg}'>"
+            f"<FONT COLOR='white'><B>{name}</B></FONT></TD></TR>"
+            f"{''.join(rows)}</TABLE>>")
+
+dot.node("user", label=_table("User", header_bg="#2196F3", fields=[
+    ("PK", "id", "uuid"), ("", "email", "varchar"), ...
+]))
+```
+
+Key graphviz ERD rules:
+- Use `shape="plain"` (not `record`) — HTML labels give proper table layout
+- Set `BORDER='1' CELLBORDER='1'` — without borders, tables look broken
+- Use a visible border color (`COLOR='#888888'` or darker)
+- Colored header row for entity name
+- `arrowtail="crow", dir="both"` for crow's foot notation
+- Example: `scripts/erd-graphviz.py`
 
 ### erdantic (pip: erdantic) -- REQUIRES SYSTEM BINARY (graphviz)
 
