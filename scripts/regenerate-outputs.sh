@@ -9,6 +9,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 docker run --rm \
+  --platform linux/amd64 \
   -v "$REPO_ROOT":/workspace \
   -w /workspace/scripts \
   ubuntu:24.04 \
