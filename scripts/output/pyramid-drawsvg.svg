@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="500" height="400" viewBox="0 0 500 400">
+<defs>
+</defs>
+<rect x="0" y="0" width="500" height="400" fill="white" />
+<path d="M180.0,20.0 L320.0,20.0 L360.0,110.0 L140.0,110.0 Z" fill="#e74c3c" stroke="white" stroke-width="2" fill-opacity="0.9" />
+<text x="250.0" y="71.0" font-size="16" fill="white" text-anchor="middle" font-weight="bold" font-family="Helvetica, Arial, sans-serif">E2E Tests</text>
+<path d="M140.0,110.0 L360.0,110.0 L400.0,200.0 L100.0,200.0 Z" fill="#e67e22" stroke="white" stroke-width="2" fill-opacity="0.9" />
+<text x="250.0" y="161.0" font-size="16" fill="white" text-anchor="middle" font-weight="bold" font-family="Helvetica, Arial, sans-serif">Integration Tests</text>
+<path d="M100.0,200.0 L400.0,200.0 L440.0,290.0 L60.0,290.0 Z" fill="#3498db" stroke="white" stroke-width="2" fill-opacity="0.9" />
+<text x="250.0" y="251.0" font-size="16" fill="white" text-anchor="middle" font-weight="bold" font-family="Helvetica, Arial, sans-serif">Component Tests</text>
+<path d="M60.0,290.0 L440.0,290.0 L480.0,380.0 L20.0,380.0 Z" fill="#2ecc71" stroke="white" stroke-width="2" fill-opacity="0.9" />
+<text x="250.0" y="341.0" font-size="16" fill="white" text-anchor="middle" font-weight="bold" font-family="Helvetica, Arial, sans-serif">Unit Tests</text>
+<text x="250.0" y="395" font-size="12" fill="#666" text-anchor="middle" font-family="Helvetica, Arial, sans-serif">Testing Pyramid</text>
+</svg>
