@@ -42,19 +42,26 @@ jobs:
 
   smoke-test:
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:24.04
     steps:
+      - name: Install system dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq git graphviz curl fonts-liberation fontconfig > /dev/null 2>&1
+          fc-cache -f > /dev/null 2>&1
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - name: Install Graphviz
-        run: sudo apt-get update && sudo apt-get install -y graphviz
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
       - name: Run all scripts
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           cd scripts
           # blockdiag/seqdiag are unmaintained and incompatible with Pillow 10+
           SKIP="block-blockdiag.py sequence-seqdiag.py"
           for script in *.py; do
             if echo "$SKIP" | grep -qw "$script"; then
-              echo "::warning::Skipping $script (unmaintained, requires Pillow<10)"
+              echo "Skipping $script (unmaintained, requires Pillow<10)"
               continue
             fi
             echo "::group::$script"

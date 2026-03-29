@@ -15,7 +15,8 @@ docker run --rm \
   bash -c '
     set -euo pipefail
     apt-get update -qq
-    apt-get install -y -qq graphviz curl > /dev/null 2>&1
+    apt-get install -y -qq graphviz curl fonts-liberation fontconfig > /dev/null 2>&1
+    fc-cache -f > /dev/null 2>&1
 
     # Install uv
     curl -LsSf https://astral.sh/uv/install.sh | sh > /dev/null 2>&1
