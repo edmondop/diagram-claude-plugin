@@ -72,14 +72,15 @@ jobs:
           fi
       - name: Check output files match committed versions
         run: |
-          if git diff --name-only scripts/output/ | grep -q .; then
-            echo "::error::Committed output SVGs are stale. Regenerate with:"
+          changed=$(git diff --name-only scripts/output/)
+          untracked=$(git ls-files --others --exclude-standard scripts/output/)
+          if [ -n "$changed" ] || [ -n "$untracked" ]; then
+            echo "::error::Committed outputs are stale. Regenerate with:"
             echo "  cd scripts && for f in *.py; do uv run \"\$f\"; done"
             echo ""
-            echo "Changed files:"
-            git diff --name-only scripts/output/
+            [ -n "$changed" ] && echo "Changed files:" && echo "$changed"
+            [ -n "$untracked" ] && echo "Untracked files:" && echo "$untracked"
             echo ""
-            echo "Diff:"
             git diff --stat scripts/output/
             exit 1
           fi

@@ -29,7 +29,7 @@ def main() -> None:
         "Web Application Architecture",
         show=False,
         filename="output/cloud-arch-diagrams",
-        outformat="svg",
+        outformat="png",
         direction="TB",
     ):
         dns = Route53("DNS")
@@ -50,7 +50,7 @@ def main() -> None:
         web >> cache
         web >> storage
 
-    print("Saved: output/cloud-arch-diagrams.svg")
+    print("Saved: output/cloud-arch-diagrams.png")
 
 
 if __name__ == "__main__":
