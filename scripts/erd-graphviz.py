@@ -45,10 +45,11 @@ def _table(
         )
     field_rows = "\n".join(rows)
     return (
-        f"<<TABLE BORDER='0' CELLBORDER='0' CELLSPACING='0' CELLPADDING='4'>"
+        f"<<TABLE BORDER='1' CELLBORDER='1' CELLSPACING='0' CELLPADDING='4'"
+        f" COLOR='#888888'>"
         f"<TR><TD COLSPAN='3' BGCOLOR='{header_bg}'>"
         f"<FONT COLOR='{header_fg}'><B>{name}</B></FONT></TD></TR>"
-        f"<HR/>{field_rows}</TABLE>>"
+        f"{field_rows}</TABLE>>"
     )
 
 
