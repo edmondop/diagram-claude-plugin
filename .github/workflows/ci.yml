@@ -51,6 +51,8 @@ jobs:
           apt-get install -y -qq git graphviz curl fonts-liberation fontconfig > /dev/null 2>&1
           fc-cache -f > /dev/null 2>&1
       - uses: actions/checkout@v4
+      - name: Trust checkout directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
       - name: Run all scripts
