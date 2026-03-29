@@ -81,16 +81,36 @@ jobs:
           fi
       - name: Check output files match committed versions
         run: |
-          changed=$(git diff --name-only scripts/output/)
+          # Matplotlib SVG output contains architecture-dependent float
+          # coordinates (ARM vs x86_64), so we only warn on those diffs.
+          # Graphviz/svgwrite outputs are fully deterministic in this container.
+          MATPLOTLIB_OUTPUTS="memory-layout-matplotlib.svg network-networkx.svg"
+
           untracked=$(git ls-files --others --exclude-standard scripts/output/)
-          if [ -n "$changed" ] || [ -n "$untracked" ]; then
+          if [ -n "$untracked" ]; then
+            echo "::error::New output files not committed. Run and commit:"
+            echo "  ./scripts/regenerate-outputs.sh"
+            echo "$untracked"
+            exit 1
+          fi
+
+          changed=$(git diff --name-only scripts/output/)
+          strict_failures=""
+          for f in $changed; do
+            base=$(basename "$f")
+            if echo "$MATPLOTLIB_OUTPUTS" | grep -qw "$base"; then
+              echo "::warning::$f differs (matplotlib arch-dependent floats — OK)"
+            else
+              strict_failures="$strict_failures $f"
+            fi
+          done
+
+          if [ -n "$strict_failures" ]; then
             echo "::error::Committed outputs are stale. Regenerate with:"
             echo "  ./scripts/regenerate-outputs.sh"
             echo ""
-            [ -n "$changed" ] && echo "Changed files:" && echo "$changed"
-            [ -n "$untracked" ] && echo "Untracked files:" && echo "$untracked"
-            echo ""
-            git diff --stat scripts/output/
+            echo "Changed files:$strict_failures"
+            git diff --stat $strict_failures
             exit 1
           fi
-          echo "All output files match committed versions."
+          echo "All deterministic output files match committed versions."
