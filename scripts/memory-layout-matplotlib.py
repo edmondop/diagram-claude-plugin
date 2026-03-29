@@ -12,9 +12,11 @@ and arrow. Key techniques:
 - Explicit zorder to prevent patches covering text
 - Negative arc radius to route arrows below content
 """
+
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.patches as patches  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
@@ -148,9 +150,20 @@ def main() -> None:
     # Heap buffer
     hx, hy = 7.2, 4.5
     ax.add_patch(
-        plt.Rectangle((hx, hy), 2.2, 0.7, facecolor="#d4edda", edgecolor="#333", linewidth=1.2)
+        plt.Rectangle(
+            (hx, hy), 2.2, 0.7, facecolor="#d4edda", edgecolor="#333", linewidth=1.2
+        )
     )
-    ax.text(hx + 1.1, hy + 0.35, '"hello"', ha="center", va="center", fontsize=8, fontfamily="monospace", color="#333")
+    ax.text(
+        hx + 1.1,
+        hy + 0.35,
+        '"hello"',
+        ha="center",
+        va="center",
+        fontsize=8,
+        fontfamily="monospace",
+        color="#333",
+    )
     ax.text(hx + 1.1, hy + 0.9, "heap @ 0x5000", ha="center", fontsize=7, color="#888")
 
     # Arrow from s1.ptr — midpoint of ptr cell, route BELOW title text
@@ -168,10 +181,18 @@ def main() -> None:
         bbox=dict(facecolor="#f0fdf4", edgecolor="#16a34a", boxstyle="round,pad=0.2"),
     )
 
-    ax.set_title("String move: pointers target external heap", fontsize=9, fontweight="bold", color="#333", pad=8)
+    ax.set_title(
+        "String move: pointers target external heap",
+        fontsize=9,
+        fontweight="bold",
+        color="#333",
+        pad=8,
+    )
     plt.tight_layout()
 
-    fig.savefig("output/memory-layout-matplotlib.svg", format="svg", bbox_inches="tight")
+    fig.savefig(
+        "output/memory-layout-matplotlib.svg", format="svg", bbox_inches="tight"
+    )
     print("Saved: output/memory-layout-matplotlib.svg")
     plt.close()
 

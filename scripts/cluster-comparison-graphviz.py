@@ -10,6 +10,7 @@ Demonstrates graphviz patterns for comparing two approaches:
 - Labeled edges within clusters
 - Top-to-bottom flow within each cluster
 """
+
 from pathlib import Path
 
 import graphviz

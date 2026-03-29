@@ -10,6 +10,7 @@ Demonstrates svgwrite patterns:
 - Dual vertical axes with arrow markers
 - Annotations positioned relative to layer edges
 """
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -184,7 +185,11 @@ def _draw_axis(
     )
     dwg.add(
         dwg.polygon(
-            [(x, AXIS_BOTTOM_Y), (x - 6, AXIS_BOTTOM_Y - 9.6), (x + 6, AXIS_BOTTOM_Y - 9.6)],
+            [
+                (x, AXIS_BOTTOM_Y),
+                (x - 6, AXIS_BOTTOM_Y - 9.6),
+                (x + 6, AXIS_BOTTOM_Y - 9.6),
+            ],
             fill="black",
         )
     )
@@ -222,7 +227,9 @@ def main() -> None:
     _draw_layers(dwg)
     _draw_outline_and_dividers(dwg)
     _draw_labels(dwg)
-    _draw_axis(dwg, x=AXIS_LEFT_X, top_label="More integration", bottom_label="More isolation")
+    _draw_axis(
+        dwg, x=AXIS_LEFT_X, top_label="More integration", bottom_label="More isolation"
+    )
     _draw_axis(dwg, x=AXIS_RIGHT_X, top_label="Slower", bottom_label="Faster")
 
     dwg.save()

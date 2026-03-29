@@ -10,6 +10,7 @@ Demonstrates graphviz patterns for data pipeline / ETL DAGs:
 - Multi-line labels with \\n for compact nodes
 - Top-to-bottom flow (rankdir="TB")
 """
+
 from pathlib import Path
 
 import graphviz
@@ -38,7 +39,9 @@ def main() -> None:
     )
 
     # Sources (gray)
-    dot.node("raw_events", "source:\nraw_events", fillcolor="#78909C", fontcolor="white")
+    dot.node(
+        "raw_events", "source:\nraw_events", fillcolor="#78909C", fontcolor="white"
+    )
     dot.node("raw_users", "source:\nraw_users", fillcolor="#78909C", fontcolor="white")
 
     # Staging (blue)
@@ -46,13 +49,38 @@ def main() -> None:
     dot.node("stg_users", "stg_users", fillcolor="#1E88E5", fontcolor="white")
 
     # Intermediate (amber)
-    dot.node("int_events_enriched", "int_events_\nenriched", fillcolor="#F9A825", fontcolor="white")
-    dot.node("int_daily_metrics", "int_daily_\nmetrics", fillcolor="#F9A825", fontcolor="white")
+    dot.node(
+        "int_events_enriched",
+        "int_events_\nenriched",
+        fillcolor="#F9A825",
+        fontcolor="white",
+    )
+    dot.node(
+        "int_daily_metrics",
+        "int_daily_\nmetrics",
+        fillcolor="#F9A825",
+        fontcolor="white",
+    )
 
     # Output (green)
-    dot.node("fct_user_activity", "fct_user_\nactivity", fillcolor="#2E7D32", fontcolor="white")
-    dot.node("fct_daily_summary", "fct_daily_\nsummary", fillcolor="#2E7D32", fontcolor="white")
-    dot.node("fct_executive_report", "fct_executive_\nreport", fillcolor="#2E7D32", fontcolor="white")
+    dot.node(
+        "fct_user_activity",
+        "fct_user_\nactivity",
+        fillcolor="#2E7D32",
+        fontcolor="white",
+    )
+    dot.node(
+        "fct_daily_summary",
+        "fct_daily_\nsummary",
+        fillcolor="#2E7D32",
+        fontcolor="white",
+    )
+    dot.node(
+        "fct_executive_report",
+        "fct_executive_\nreport",
+        fillcolor="#2E7D32",
+        fontcolor="white",
+    )
 
     # Edges
     dot.edge("raw_events", "stg_events")

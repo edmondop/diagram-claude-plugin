@@ -76,7 +76,7 @@ jobs:
           untracked=$(git ls-files --others --exclude-standard scripts/output/)
           if [ -n "$changed" ] || [ -n "$untracked" ]; then
             echo "::error::Committed outputs are stale. Regenerate with:"
-            echo "  cd scripts && for f in *.py; do uv run \"\$f\"; done"
+            echo "  ./scripts/regenerate-outputs.sh"
             echo ""
             [ -n "$changed" ] && echo "Changed files:" && echo "$changed"
             [ -n "$untracked" ] && echo "Untracked files:" && echo "$untracked"

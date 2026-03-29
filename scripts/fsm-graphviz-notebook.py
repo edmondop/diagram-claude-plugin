@@ -11,6 +11,7 @@ Demonstrates the pattern for embedding graphviz diagrams in notebooks
 - Left-aligned edge labels with \\l escape
 - XML prologue stripping for notebook embedding
 """
+
 from pathlib import Path
 
 import graphviz
@@ -105,7 +106,14 @@ def main() -> None:
         label="State2: write future borrows\n&response, which is a field\n"
         "of this same enum variant.\nSelf-referential struct.",
     )
-    g.edge("note", "State2", style="dashed", color="#c0392b", arrowhead="vee", constraint="false")
+    g.edge(
+        "note",
+        "State2",
+        style="dashed",
+        color="#c0392b",
+        arrowhead="vee",
+        constraint="false",
+    )
 
     # Save as standalone SVG
     g.render("output/fsm-graphviz-notebook", cleanup=True)
