@@ -318,27 +318,32 @@ If you must generate inline:
 
 1. **graphviz SVG pipe** is the most reliable approach for node+edge
    diagrams. Render to SVG string and embed in the notebook's HTML
-   output:
+   output. **Critical:** `graphviz.pipe()` outputs a full XML document
+   with `<?xml ...?>` and `<!DOCTYPE ...>` before the `<svg>` tag.
+   Notebook markdown renderers cannot parse this. Strip the prologue
+   and use the notebook's raw HTML embedding:
    ```python
    import graphviz
    g = graphviz.Digraph(format="svg")
    g.attr(bgcolor="white", rankdir="TB", fontname="Helvetica")
    # ... build graph ...
-   svg = g.pipe(format="svg").decode("utf-8")
-   # In marimo: mo.md(f"...{svg}...")
+   svg_raw = g.pipe(format="svg").decode("utf-8")
+   svg = svg_raw[svg_raw.index("<svg"):]  # strip XML prologue
+   # In marimo: mo.Html(svg)  — NOT mo.md(), which can't parse raw SVG
    # In Jupyter: from IPython.display import SVG, display; display(SVG(svg))
    ```
 
 2. **matplotlib for memory layouts and coordinate-precise diagrams.**
    Use matplotlib when you need exact control over rectangle positions,
    byte-level addresses, and pointer arrows — things auto-layout tools
-   can't express.
+   can't express. Example: `scripts/memory-layout-matplotlib.py`.
 
 3. **Do NOT use matplotlib for state machines, flowcharts, or anything
    with nodes + edges.** Manual circle/arrow positioning in matplotlib
    is fragile — zorder bugs, arrow routing conflicts, and text
    centering all require tedious manual tuning. Use graphviz or
    PlantUML instead, which handle layout automatically.
+   Example: `scripts/fsm-graphviz-notebook.py`.
 
 ## Python Library Quick Reference
 
@@ -387,6 +392,32 @@ nodes + edges + auto-layout.
 5. **Avoid long multi-line labels** on edges — they create large bounding
    boxes that distort layout. Keep edge labels to 1-2 short lines max.
    Move detailed descriptions into node labels or annotations instead.
+
+6. **`fixedsize="true"` propagates via global node attrs.** If you set
+   `g.attr("node", fixedsize="true")` for uniform circles, every node
+   inherits it — including annotation `shape="note"` nodes whose text
+   won't fit. Override per-node with `fixedsize="false"`:
+   ```python
+   g.attr("node", fixedsize="true", width="1.0", height="1.0")
+   g.node("State0", shape="circle")  # fixed size — good
+   g.node("note", shape="note", fixedsize="false", width="0", height="0",
+          label="Long annotation\ntext here")  # auto-sized — good
+   ```
+
+7. **Bold node labels without bold borders.** `style="filled,bold"`
+   makes both the border stroke and the label text bold. To bold only
+   the text, use HTML-like labels instead:
+   ```python
+   g.node("S0", label="<<b>State0</b>>")  # bold text, normal border
+   ```
+
+8. **Left-aligned edge labels with `\l`.** Use `\\l` (graphviz
+   left-align escape) instead of `\n` for multi-line edge labels that
+   read like code. Pad with extra leading spaces to push text away
+   from the arrow:
+   ```python
+   g.edge("A", "B", label="   step 1,\\l   step 2,\\l   step 3\\l")
+   ```
 
 ### diagrams (pip: diagrams) -- REQUIRES SYSTEM BINARY
 
@@ -493,6 +524,13 @@ Graph-theory layouts. Best for DAGs with `topological_generations` +
    coordinate recalculations. Use graphviz or PlantUML instead — they
    handle layout automatically and produce cleaner results with less
    code.
+
+4. **Comparison diagrams: stack vertically, not side-by-side.** When
+   comparing two categories (e.g., "Unpin types" vs "!Unpin types"),
+   vertical stacking with full width is far more readable than
+   side-by-side boxes — especially when labels are long. Use two-row
+   grids inside each box when showing many items, rather than one
+   cramped horizontal line. Bump font to 10pt+ for readability.
 
 ### erdantic (pip: erdantic) -- REQUIRES SYSTEM BINARY (graphviz)
 
