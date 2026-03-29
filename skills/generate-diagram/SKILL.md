@@ -357,7 +357,8 @@ nodes + edges + auto-layout.
 - Clusters via `with dot.subgraph(name="cluster_xxx"):`
 - Record nodes for ERDs: `shape="record"`, `<port> field` syntax
 - Output: `dot.render(filename, directory, cleanup=True)` or `dot.pipe(encoding="utf-8")`
-- Example: `scripts/flowchart-graphviz.py`
+- Example: `scripts/flowchart-graphviz.py`, `scripts/layered-dag-graphviz.py`,
+  `scripts/cluster-comparison-graphviz.py`
 
 #### Graphviz Label & Layout Tips
 
@@ -439,7 +440,7 @@ geometry (pyramids, stacked layers, custom illustrations).
 - All geometry must be computed -- never hardcode coordinates
 - Configuration constants at the top of the script
 - Per-element nudges via `y_nudge`/`x_nudge` fields
-- Example: `scripts/pyramid-svgwrite.py`
+- Example: `scripts/pyramid-svgwrite.py`, `scripts/pyramid-svgwrite-testing.py`
 
 ### drawsvg (pip: drawsvg~=2.0)
 
