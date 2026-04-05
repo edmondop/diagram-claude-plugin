@@ -49,19 +49,17 @@ nodes + edges + auto-layout.
    the ones that visibly overlap — it prevents the problem before it appears.
    Combine with generous margins (see tip 3) for best results.
 
-3. **Use generous margins on nested clusters (24+).** Nested clusters
-   with tight margins cause two problems: child content clips the
-   container border, and `xlabel` labels on edges leaving the cluster
-   overlap with the border. The outermost container needs the most margin
-   because its border sits between the last internal node and the first
-   external node — any edge labels in that gap collide with the border:
+3. **Cluster `margin` adds padding *inside* the container.** A larger
+   margin pushes the border further from the internal nodes — but that
+   means the border moves *closer* to the next external node. Do NOT
+   increase margins to fix tight spacing between a container border and
+   an outside node; that makes it worse. Use `minlen` on border-crossing
+   edges instead (see tip 9). Keep margins moderate (14-24) for internal
+   breathing room:
    ```python
-   # Outermost cluster — biggest margin, border must clear xlabels
-   outer.attr(margin="36")
-   # Middle cluster
-   middle.attr(margin="24")
-   # Innermost cluster
-   inner.attr(margin="24")
+   outer.attr(margin="24")   # outermost cluster
+   middle.attr(margin="20")  # middle cluster
+   inner.attr(margin="14")   # innermost cluster
    ```
 
 4. **Cluster labels overlap node content when the cluster is narrow.**
@@ -95,13 +93,18 @@ nodes + edges + auto-layout.
    dot.attr(nodesep="0.7")  # more horizontal space between siblings
    ```
 
-9. **Increase `ranksep` when arrows cross container borders.** The default
-   `ranksep` (0.5) leaves almost no gap between a cluster's bottom border
-   and the next node below it. Arrows exiting a container visually merge
-   with the border, making the diagram feel cramped. Use 0.75-1.0:
+9. **Use `minlen` on edges that cross container borders.** When an arrow
+   exits a cluster, the cluster border, the xlabel, and the target node
+   all compete for the same tight vertical gap. Increasing `ranksep`
+   fixes this but wastes space on *every* rank transition. Instead, add
+   `minlen="2"` only on edges that cross a container border:
    ```python
-   dot.attr(ranksep="0.8")  # more vertical space between ranks
+   # Crosses Gunicorn cluster border — needs extra space
+   dot.edge("greenlet", "registry", xlabel="  session_factory()  ", minlen="2")
+
+   # Stays inside the same cluster — default distance is fine
+   dot.edge("registry", "session", xlabel="  returns Session  ")
    ```
-   This is especially important when nodes sit directly below a cluster —
-   the arrow, the container border, and the target node all occupy the
-   same tight vertical band without extra `ranksep`.
+   This doubles the rank distance for that specific edge while keeping
+   all other transitions compact. Apply to every edge whose source and
+   target are in different clusters.
