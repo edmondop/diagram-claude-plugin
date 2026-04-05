@@ -184,6 +184,13 @@ Unless the user specifies otherwise:
 - **No gradients, no decorative elements**
 - **PlantUML theme**: transparent background, `#1a5ad7` borders, `#0b2147` text
 
+### Cluster Labels (Graphviz)
+
+Always set `labeljust="l"` on every cluster. Centered labels (the
+default) sit in the path of vertical arrows entering the container from
+above. Left-aligning moves the label to the top-left corner, out of the
+arrow path. This should be applied unconditionally to all clusters.
+
 ### Color Restraint
 
 Limit each diagram to **black + one accent color**. Multiple accent

@@ -33,12 +33,20 @@ nodes + edges + auto-layout.
    Note: `xlabel` requires `forcelabels="true"` in graph attributes.
    Pad with leading/trailing spaces to push the label further from the line.
 
-2. **Use `labeljust` to prevent cluster labels from overlapping arrows.**
-   When arrows pass through a cluster, the default centered label often
-   collides with the arrow path. Push the label to the left or right:
+2. **Always left-align cluster labels with `labeljust="l"`.** Graphviz
+   centers cluster labels by default. In top-down (`rankdir="TB"`) layouts,
+   arrows entering a cluster from above pass through the horizontal center
+   — exactly where the centered label sits. Left-aligning the label pushes
+   it out of the arrow path:
    ```python
-   c.attr(label="My Cluster", labeljust="l")  # label hugs left edge
+   # BAD: centered label collides with vertical arrows entering the cluster
+   c.attr(label="Python Process (one per worker)")
+
+   # GOOD: left-aligned label stays clear of center arrows
+   c.attr(label="Python Process (one per worker)", labeljust="l")
    ```
+   Apply `labeljust="l"` to **every cluster** in the diagram, not just
+   the ones that visibly overlap — it prevents the problem before it appears.
    Combine with generous margins (see tip 3) for best results.
 
 3. **Use generous margins on nested clusters (20+).** Nested clusters
