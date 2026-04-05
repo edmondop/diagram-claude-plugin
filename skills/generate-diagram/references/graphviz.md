@@ -108,3 +108,31 @@ nodes + edges + auto-layout.
    This doubles the rank distance for that specific edge while keeping
    all other transitions compact. Apply to every edge whose source and
    target are in different clusters.
+
+10. **Use invisible spacer nodes to widen clusters.** When `labeljust="l"`
+    labels still overlap with arrows entering from the top, the cluster
+    isn't wide enough. Add an invisible node declared *before* visible
+    nodes — DOT places it leftmost, extending the cluster border left
+    so the label sits clear of arrow paths:
+    ```python
+    with dot.subgraph(name="cluster_gateway") as c:
+        c.attr(label="API Gateway", labeljust="l", margin="30", ...)
+        # Left spacer — pushes cluster border left of arrow entry points
+        c.node("gw_pad", label="", style="invis",
+               fixedsize="true", width="1.2", height="0.01")
+        c.node("gateway", label="Kong Gateway")
+        c.node("auth", label="Auth Service")
+    ```
+
+## Automated Quality Validation
+
+After rendering, validate the SVG with the test suite:
+
+```bash
+uv run --with svgpathtools --with shapely --with pytest -- \
+  pytest references/examples/test_svg_quality.py -v
+```
+
+The tests use proper Bezier curve sampling (not just control points)
+to detect arrows crossing text and text crossing cluster borders.
+See `references/examples/test_fixtures/` for anti-pattern examples.

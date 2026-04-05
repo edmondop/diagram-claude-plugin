@@ -234,6 +234,54 @@ prefer **two separate diagrams** over one combined side-by-side diagram.
 Combined diagrams double the visual complexity and force the reader to
 parse both scenarios simultaneously.
 
+## SVG Quality Validation (Graphviz)
+
+After generating a Graphviz diagram, validate the SVG with the quality
+test suite. The tests use `svgpathtools` for proper Bezier curve sampling
+and `shapely` for geometric intersection tests.
+
+```bash
+# Run all quality checks against a rendered SVG
+uv run --with svgpathtools --with shapely --with pytest -- \
+  pytest references/examples/test_svg_quality.py -v
+
+# Quick CLI check against a specific SVG
+uv run --with svgpathtools --with shapely --with pytest -- \
+  python references/examples/test_svg_quality.py path/to/diagram.svg
+```
+
+**Critical rules enforced:**
+
+1. **No arrow crosses any text** — arrow Bezier curves must not pass
+   through cluster labels, edge labels, or node labels
+2. **No text crosses any border** — no text element may overlap a
+   cluster border line
+3. **No label overlaps** — no two text elements may overlap each other
+
+**Anti-pattern fixtures** in `references/examples/test_fixtures/` show
+common layout problems that the tests catch:
+
+| Fixture | Anti-pattern |
+|---|---|
+| `architecture-arrow-crosses-label.svg` | Arrows through cluster labels (naive regex missed these) |
+| `architecture-arrow-crosses-data-layer.svg` | Bezier curve crosses label (only caught by svgpathtools) |
+| `architecture-centered-labels.svg` | Centered labels + rainbow colors + off-center data layer |
+| `labels-overlap.svg` | Multiple edge labels overlapping each other |
+| `text-on-border.svg` | Edge label sitting on a cluster border |
+| `rainbow-colors.svg` | Multi-color clusters with centered labels colliding with arrows |
+| `data-layer-off-center.svg` | Data cluster positioned far from backend |
+
+When iterating on diagram layout, use the test suite as an objective
+function — keep adjusting the Graphviz source until all checks pass.
+
+**Fix patterns for common failures:**
+- Arrow crosses cluster label → add invisible spacer node to widen
+  cluster, pushing the left-justified label away from arrow entry points
+- Text crosses border → remove `xlabel` from cross-connection edges,
+  or add `minlen` to create clearance
+- Labels overlap → increase `nodesep`, use `constraint="false"` on
+  cross-connections, or remove redundant labels
+
 ## Additional References
 
 - @references/bounded-context-naming.md — rules for naming bounded contexts in DDD diagrams
