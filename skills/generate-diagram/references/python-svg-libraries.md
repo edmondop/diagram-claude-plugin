@@ -131,11 +131,23 @@ When building sequence diagrams with svgwrite:
    sequence flow clean and puts the explanation where it doesn't compete
    with the arrows.
 
-5. **Bold monospace at 11px+ for arrow labels.** Default 10px normal
+5. **Compute callout note width from text, never hardcode.** Hardcoded
+   widths break when text changes. Compute from the longest line:
+   ```python
+   font_size = 10  # px
+   max_chars = max(len(line) for line in callout_lines)
+   # Helvetica/sans-serif: ~0.55 × font_size per character
+   # Courier/monospace: ~0.6 × font_size per character
+   note_w = int(max_chars * font_size * 0.55) + 20  # 20px padding
+   ```
+   Then size `RIGHT_EXTRA` (the diagram's right margin) to fit:
+   `RIGHT_EXTRA = note_w + 40` (20px gap from lifeline + 20px right pad).
+
+6. **Bold monospace at 11px+ for arrow labels.** Default 10px normal
    weight is too thin for documentation. Use `font_size="11px"` and
    `font_weight="bold"` on all arrow labels. Callout text should be at
    least 10px with weight 500.
 
-6. **Separator text at #555, not #888.** Light gray separators
+7. **Separator text at #555, not #888.** Light gray separators
    ("Greenlet A yields...") become unreadable in documentation. Use
    `#555555` for sufficient contrast on white backgrounds.
