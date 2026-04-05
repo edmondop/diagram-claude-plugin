@@ -184,6 +184,41 @@ Unless the user specifies otherwise:
 - **No gradients, no decorative elements**
 - **PlantUML theme**: transparent background, `#1a5ad7` borders, `#0b2147` text
 
+### Color Restraint
+
+Limit each diagram to **black + one accent color**. Multiple accent
+colors (e.g., blue boxes, orange borders, green highlights, red warnings)
+create visual noise that distracts from the content. When comparing two
+states (bug vs fix, before vs after), use separate diagrams with
+different single accents (e.g., red for the bug, green for the fix)
+rather than mixing both colors in one diagram.
+
+### Font Sizing for Documentation
+
+Default font sizes in diagram libraries are often too small when the
+diagram is embedded in documentation. Bump all text up ~2px from library
+defaults for readability:
+
+- **Titles**: 14-16px
+- **Node labels**: 11-12px
+- **Edge labels / annotations**: 10-11px
+- **Secondary text**: 9-10px
+
+### Complexity Reduction
+
+When a diagram has repeated similar elements (e.g., multiple workers,
+multiple servers), show **one expanded example** with full detail and
+collapse the rest into a single placeholder node (e.g.,
+`"Worker 2 ... Worker N"` with dashed style). This conveys the pattern
+without cluttering the diagram.
+
+### Split Over Combine
+
+When comparing two states or scenarios (bug vs fix, before vs after),
+prefer **two separate diagrams** over one combined side-by-side diagram.
+Combined diagrams double the visual complexity and force the reader to
+parse both scenarios simultaneously.
+
 ## Additional References
 
 - @references/bounded-context-naming.md — rules for naming bounded contexts in DDD diagrams
