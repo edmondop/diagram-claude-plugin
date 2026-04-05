@@ -91,3 +91,14 @@ nodes + edges + auto-layout.
    ```python
    dot.attr(nodesep="0.7")  # more horizontal space between siblings
    ```
+
+9. **Increase `ranksep` when arrows cross container borders.** The default
+   `ranksep` (0.5) leaves almost no gap between a cluster's bottom border
+   and the next node below it. Arrows exiting a container visually merge
+   with the border, making the diagram feel cramped. Use 0.75-1.0:
+   ```python
+   dot.attr(ranksep="0.8")  # more vertical space between ranks
+   ```
+   This is especially important when nodes sit directly below a cluster —
+   the arrow, the container border, and the target node all occupy the
+   same tight vertical band without extra `ranksep`.
