@@ -41,6 +41,7 @@ MAX_CENTER_OFFSET_RATIO = 0.7
 # Geometry helpers
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class BBox:
     x_min: float
@@ -57,8 +58,12 @@ class BBox:
         return self.x_max - self.x_min
 
     def overlaps(self, other: "BBox") -> bool:
-        return (self.x_min < other.x_max and self.x_max > other.x_min and
-                self.y_min < other.y_max and self.y_max > other.y_min)
+        return (
+            self.x_min < other.x_max
+            and self.x_max > other.x_min
+            and self.y_min < other.y_max
+            and self.y_max > other.y_min
+        )
 
     def to_shapely(self):
         return shapely_box(self.x_min, self.y_min, self.x_max, self.y_max)
@@ -110,6 +115,7 @@ def text_bbox(elem: ET.Element) -> BBox | None:
 # ---------------------------------------------------------------------------
 # SVG parser
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class ParsedSVG:
@@ -174,22 +180,27 @@ def parse_svg(svg_path: Path) -> ParsedSVG:
             tb = text_bbox(text_el)
             if tb:
                 label_text = (text_el.text or "").strip()
-                edge_labels.append(
-                    (f"{edge_name}: '{label_text}'", edge_name, tb)
-                )
+                edge_labels.append((f"{edge_name}: '{label_text}'", edge_name, tb))
         path_el = g.find("path")
         if path_el is not None:
             d = path_el.get("d", "")
             if d:
                 edge_paths.append((edge_name, d))
 
-    return ParsedSVG(clusters, cluster_labels, cluster_border_paths,
-                     node_labels, edge_labels, edge_paths)
+    return ParsedSVG(
+        clusters,
+        cluster_labels,
+        cluster_border_paths,
+        node_labels,
+        edge_labels,
+        edge_paths,
+    )
 
 
 # ---------------------------------------------------------------------------
 # Quality checks — each returns a list of error strings
 # ---------------------------------------------------------------------------
+
 
 def check_arrow_crosses_any_text(
     svg: ParsedSVG,
@@ -214,9 +225,7 @@ def check_arrow_crosses_any_text(
                 continue
             text_poly = text_bb.to_shapely().buffer(padding)
             if arrow_line.intersects(text_poly):
-                errors.append(
-                    f"Arrow {edge_name} crosses {text_name}"
-                )
+                errors.append(f"Arrow {edge_name} crosses {text_name}")
 
     return errors
 
@@ -245,9 +254,7 @@ def check_text_crosses_border(
                 continue
             text_poly = text_bb.to_shapely()
             if text_poly.intersects(thick_border):
-                errors.append(
-                    f"{text_name} crosses {cluster_name} border"
-                )
+                errors.append(f"{text_name} crosses {cluster_name} border")
 
     return errors
 
@@ -280,13 +287,10 @@ def check_label_overlaps(svg: ParsedSVG) -> list[str]:
         (f"cluster:{name} '{text}'", bb)
         for name, (text, bb) in svg.cluster_labels.items()
     )
-    all_labels.extend(
-        (display_name, bb)
-        for display_name, _, bb in svg.edge_labels
-    )
+    all_labels.extend((display_name, bb) for display_name, _, bb in svg.edge_labels)
     all_labels.extend(svg.node_labels)
     for i, (name_a, bb_a) in enumerate(all_labels):
-        for name_b, bb_b in all_labels[i + 1:]:
+        for name_b, bb_b in all_labels[i + 1 :]:
             if bb_a.overlaps(bb_b):
                 errors.append(f"Labels overlap: {name_a} vs {name_b}")
     return errors
@@ -304,6 +308,7 @@ def run_all_checks(svg: ParsedSVG) -> list[str]:
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 class TestOutputDiagram:
     """Tests for the generated architecture diagram."""
@@ -362,8 +367,11 @@ class TestFixturesMustFail:
 if __name__ == "__main__":
     import sys
 
-    svg_path = (Path(sys.argv[1]) if len(sys.argv) > 1
-                else OUTPUT_DIR / "architecture-graphviz.svg")
+    svg_path = (
+        Path(sys.argv[1])
+        if len(sys.argv) > 1
+        else OUTPUT_DIR / "architecture-graphviz.svg"
+    )
     if not svg_path.exists():
         print(f"File not found: {svg_path}")
         sys.exit(1)
@@ -371,9 +379,11 @@ if __name__ == "__main__":
     svg = parse_svg(svg_path)
     errors = run_all_checks(svg)
 
-    print(f"Parsed: {len(svg.clusters)} clusters, "
-          f"{len(svg.node_labels)} nodes, "
-          f"{len(svg.edge_labels)} edge labels")
+    print(
+        f"Parsed: {len(svg.clusters)} clusters, "
+        f"{len(svg.node_labels)} nodes, "
+        f"{len(svg.edge_labels)} edge labels"
+    )
     if errors:
         print(f"\nERRORS ({len(errors)}):")
         for e in errors:

@@ -99,8 +99,14 @@ def main() -> None:
             margin="30",
         )
         # Left spacer pushes cluster border left, keeping label clear of arrows
-        c.node("gw_pad", label="", style="invis",
-               fixedsize="true", width="1.2", height="0.01")
+        c.node(
+            "gw_pad",
+            label="",
+            style="invis",
+            fixedsize="true",
+            width="1.2",
+            height="0.01",
+        )
         c.node("gateway", label="Kong Gateway")
         c.node("auth", label="Auth Service")
         c.edge("gateway", "auth", style="dashed", constraint="false")
@@ -118,8 +124,14 @@ def main() -> None:
             margin="30",
         )
         # Left spacer for "Backend Services" — wider label needs more clearance
-        c.node("be_pad", label="", style="invis",
-               fixedsize="true", width="1.5", height="0.01")
+        c.node(
+            "be_pad",
+            label="",
+            style="invis",
+            fixedsize="true",
+            width="1.5",
+            height="0.01",
+        )
         c.node("order_svc", label="Order Service")
         c.node("user_svc", label="User Service")
         c.node("payment_svc", label="Payment Service")
@@ -137,14 +149,17 @@ def main() -> None:
             margin="30",
         )
         # Left spacer keeps "Data Layer" label clear of incoming arrows
-        c.node("data_pad", label="", style="invis",
-               fixedsize="true", width="1.2", height="0.01")
-        c.node("kafka", label="Kafka", shape="hexagon",
-               fillcolor=NODE_FILL)
-        c.node("postgres", label="PostgreSQL", shape="cylinder",
-               fillcolor=NODE_FILL)
-        c.node("redis", label="Redis Cache", shape="cylinder",
-               fillcolor=NODE_FILL)
+        c.node(
+            "data_pad",
+            label="",
+            style="invis",
+            fixedsize="true",
+            width="1.2",
+            height="0.01",
+        )
+        c.node("kafka", label="Kafka", shape="hexagon", fillcolor=NODE_FILL)
+        c.node("postgres", label="PostgreSQL", shape="cylinder", fillcolor=NODE_FILL)
+        c.node("redis", label="Redis Cache", shape="cylinder", fillcolor=NODE_FILL)
 
     # --- Edges ---
     # Right-column backbone (high weight) keeps vertical alignment.
@@ -162,8 +177,7 @@ def main() -> None:
     dot.edge("order_svc", "payment_svc", xlabel="  gRPC  ")
 
     # Backend → Data
-    dot.edge("order_svc", "kafka", xlabel="  events  ", weight="10",
-             minlen="2")
+    dot.edge("order_svc", "kafka", xlabel="  events  ", weight="10", minlen="2")
     dot.edge("user_svc", "postgres", weight="10", minlen="2")
 
     # Cross-connections (don't affect layout)

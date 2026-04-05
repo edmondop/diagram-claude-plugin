@@ -23,10 +23,15 @@ NODE_FILL = "#E3F2FD"
 def fixture_labels_overlap() -> None:
     """Two edge labels land on top of each other."""
     dot = graphviz.Digraph(
-        format="svg", engine="dot",
+        format="svg",
+        engine="dot",
         graph_attr={"rankdir": "TB", "nodesep": "0.3", "ranksep": "0.8"},
-        node_attr={"shape": "box", "style": "filled,rounded",
-                   "fillcolor": NODE_FILL, "color": BLACK},
+        node_attr={
+            "shape": "box",
+            "style": "filled,rounded",
+            "fillcolor": NODE_FILL,
+            "color": BLACK,
+        },
         edge_attr={"color": BLACK},
     )
 
@@ -47,23 +52,32 @@ def fixture_labels_overlap() -> None:
     dot.edge("A", "db2", xlabel="  read  ", constraint="false")
     dot.edge("B", "db1", xlabel="  write  ", constraint="false")
 
-    dot.render(filename="labels-overlap", directory=str(FIXTURES_DIR),
-               cleanup=True)
+    dot.render(filename="labels-overlap", directory=str(FIXTURES_DIR), cleanup=True)
 
 
 def fixture_text_on_border() -> None:
     """Edge label sits right on a cluster border."""
     dot = graphviz.Digraph(
-        format="svg", engine="dot",
+        format="svg",
+        engine="dot",
         graph_attr={"rankdir": "TB", "nodesep": "0.5"},
-        node_attr={"shape": "box", "style": "filled,rounded",
-                   "fillcolor": NODE_FILL, "color": BLACK},
+        node_attr={
+            "shape": "box",
+            "style": "filled,rounded",
+            "fillcolor": NODE_FILL,
+            "color": BLACK,
+        },
         edge_attr={"color": BLACK},
     )
 
     with dot.subgraph(name="cluster_inner") as c:
-        c.attr(label="Inner Cluster", labeljust="l", color=BLACK,
-               fontsize="12", margin="10")  # tight margin
+        c.attr(
+            label="Inner Cluster",
+            labeljust="l",
+            color=BLACK,
+            fontsize="12",
+            margin="10",
+        )  # tight margin
         c.node("X", label="Node X")
         c.node("Y", label="Node Y")
 
@@ -72,8 +86,7 @@ def fixture_text_on_border() -> None:
     dot.edge("external", "X", xlabel="  HTTP  ")
     dot.edge("X", "Y", xlabel="  gRPC  ")
 
-    dot.render(filename="text-on-border", directory=str(FIXTURES_DIR),
-               cleanup=True)
+    dot.render(filename="text-on-border", directory=str(FIXTURES_DIR), cleanup=True)
 
 
 def fixture_rainbow_colors() -> None:
@@ -82,7 +95,8 @@ def fixture_rainbow_colors() -> None:
     Also has centered labels (default) which overlap with arrows.
     """
     dot = graphviz.Digraph(
-        format="svg", engine="dot",
+        format="svg",
+        engine="dot",
         graph_attr={"rankdir": "TB"},
         node_attr={"shape": "box", "style": "filled,rounded"},
         edge_attr={"arrowsize": "0.7"},
@@ -90,51 +104,67 @@ def fixture_rainbow_colors() -> None:
 
     # Each cluster uses a different color — anti-pattern
     with dot.subgraph(name="cluster_web") as c:
-        c.attr(label="Web Tier", style="filled,rounded",
-               color="#2196F3", fillcolor="#E3F2FD", fontcolor="#1565C0",
-               penwidth="2")
+        c.attr(
+            label="Web Tier",
+            style="filled,rounded",
+            color="#2196F3",
+            fillcolor="#E3F2FD",
+            fontcolor="#1565C0",
+            penwidth="2",
+        )
         # No labeljust — centered label (anti-pattern)
         c.node("web", label="React App", fillcolor="#BBDEFB")
 
     with dot.subgraph(name="cluster_api") as c:
-        c.attr(label="API Tier", style="filled,rounded",
-               color="#FF9800", fillcolor="#FFF3E0", fontcolor="#E65100",
-               penwidth="2")
+        c.attr(
+            label="API Tier",
+            style="filled,rounded",
+            color="#FF9800",
+            fillcolor="#FFF3E0",
+            fontcolor="#E65100",
+            penwidth="2",
+        )
         c.node("api", label="REST API", fillcolor="#FFE0B2")
 
     with dot.subgraph(name="cluster_db") as c:
-        c.attr(label="Data Tier", style="filled,rounded",
-               color="#4CAF50", fillcolor="#E8F5E9", fontcolor="#2E7D32",
-               penwidth="2")
-        c.node("db", label="PostgreSQL", shape="cylinder",
-               fillcolor="#C8E6C9")
+        c.attr(
+            label="Data Tier",
+            style="filled,rounded",
+            color="#4CAF50",
+            fillcolor="#E8F5E9",
+            fontcolor="#2E7D32",
+            penwidth="2",
+        )
+        c.node("db", label="PostgreSQL", shape="cylinder", fillcolor="#C8E6C9")
 
     dot.edge("web", "api", label="HTTPS")
     dot.edge("api", "db", label="SQL")
 
-    dot.render(filename="rainbow-colors", directory=str(FIXTURES_DIR),
-               cleanup=True)
+    dot.render(filename="rainbow-colors", directory=str(FIXTURES_DIR), cleanup=True)
 
 
 def fixture_data_layer_off_center() -> None:
     """Data layer positioned far to the right of backend."""
     dot = graphviz.Digraph(
-        format="svg", engine="dot",
+        format="svg",
+        engine="dot",
         graph_attr={"rankdir": "TB", "nodesep": "0.8"},
-        node_attr={"shape": "box", "style": "filled,rounded",
-                   "fillcolor": NODE_FILL, "color": BLACK},
+        node_attr={
+            "shape": "box",
+            "style": "filled,rounded",
+            "fillcolor": NODE_FILL,
+            "color": BLACK,
+        },
         edge_attr={"color": BLACK},
     )
 
     with dot.subgraph(name="cluster_backend") as c:
-        c.attr(label="Backend Services", labeljust="l", color=BLACK,
-               fontsize="12")
+        c.attr(label="Backend Services", labeljust="l", color=BLACK, fontsize="12")
         c.node("svc1", label="Service 1")
         c.node("svc2", label="Service 2")
 
     with dot.subgraph(name="cluster_data") as c:
-        c.attr(label="Data Layer", labeljust="l", color=BLACK,
-               fontsize="12")
+        c.attr(label="Data Layer", labeljust="l", color=BLACK, fontsize="12")
         c.node("db", label="PostgreSQL", shape="cylinder")
         c.node("cache", label="Redis", shape="cylinder")
         c.node("queue", label="Kafka", shape="hexagon")
@@ -147,8 +177,9 @@ def fixture_data_layer_off_center() -> None:
     dot.edge("svc2", "s3", weight="10")
     dot.edge("svc1", "cache", constraint="false")
 
-    dot.render(filename="data-layer-off-center", directory=str(FIXTURES_DIR),
-               cleanup=True)
+    dot.render(
+        filename="data-layer-off-center", directory=str(FIXTURES_DIR), cleanup=True
+    )
 
 
 def main() -> None:
