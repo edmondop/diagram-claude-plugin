@@ -184,6 +184,104 @@ Unless the user specifies otherwise:
 - **No gradients, no decorative elements**
 - **PlantUML theme**: transparent background, `#1a5ad7` borders, `#0b2147` text
 
+### Cluster Labels and Borders (Graphviz)
+
+Always set `labeljust="l"` on every cluster. Centered labels (the
+default) sit in the path of vertical arrows entering the container from
+above. Left-aligning moves the label to the top-left corner, out of the
+arrow path. This should be applied unconditionally to all clusters.
+
+When edges cross cluster borders, add `minlen="2"` to give the arrow,
+xlabel, and border enough vertical space. Do NOT increase cluster
+`margin` for this — margin adds internal padding, which pushes the
+border *closer* to external nodes and makes the problem worse.
+
+### Color Restraint
+
+Limit each diagram to **black + one accent color**. Multiple accent
+colors (e.g., blue boxes, orange borders, green highlights, red warnings)
+create visual noise that distracts from the content. When comparing two
+states (bug vs fix, before vs after), use separate diagrams with
+different single accents (e.g., red for the bug, green for the fix)
+rather than mixing both colors in one diagram.
+
+### Font Sizing for Documentation
+
+Default font sizes in diagram libraries are often too small when the
+diagram is embedded in documentation. Bump all text up ~2px from library
+defaults for readability:
+
+- **Titles**: 14-16px, bold
+- **Node / participant labels**: 11-12px, bold
+- **Arrow / edge labels**: 11px, bold (especially monospace labels like
+  function calls — normal weight monospace is hard to read at small sizes)
+- **Callout / annotation text**: 10px, weight 500
+- **Secondary text** (separators, hints): 10px, use #555 not #888 for
+  sufficient contrast
+
+### Complexity Reduction
+
+When a diagram has repeated similar elements (e.g., multiple workers,
+multiple servers), show **one expanded example** with full detail and
+collapse the rest into a single placeholder node (e.g.,
+`"Worker 2 ... Worker N"` with dashed style). This conveys the pattern
+without cluttering the diagram.
+
+### Split Over Combine
+
+When comparing two states or scenarios (bug vs fix, before vs after),
+prefer **two separate diagrams** over one combined side-by-side diagram.
+Combined diagrams double the visual complexity and force the reader to
+parse both scenarios simultaneously.
+
+## SVG Quality Validation (Graphviz)
+
+After generating a Graphviz diagram, validate the SVG with the quality
+test suite. The tests use `svgpathtools` for proper Bezier curve sampling
+and `shapely` for geometric intersection tests.
+
+```bash
+# Run all quality checks against a rendered SVG
+uv run --with svgpathtools --with shapely --with pytest -- \
+  pytest references/examples/test_svg_quality.py -v
+
+# Quick CLI check against a specific SVG
+uv run --with svgpathtools --with shapely --with pytest -- \
+  python references/examples/test_svg_quality.py path/to/diagram.svg
+```
+
+**Critical rules enforced:**
+
+1. **No arrow crosses any text** — arrow Bezier curves must not pass
+   through cluster labels, edge labels, or node labels
+2. **No text crosses any border** — no text element may overlap a
+   cluster border line
+3. **No label overlaps** — no two text elements may overlap each other
+
+**Anti-pattern fixtures** in `references/examples/test_fixtures/` show
+common layout problems that the tests catch:
+
+| Fixture | Anti-pattern |
+|---|---|
+| `architecture-arrow-crosses-label.svg` | Arrows through cluster labels (naive regex missed these) |
+| `architecture-arrow-crosses-data-layer.svg` | Bezier curve crosses label (only caught by svgpathtools) |
+| `architecture-centered-labels.svg` | Centered labels + rainbow colors + off-center data layer |
+| `labels-overlap.svg` | Multiple edge labels overlapping each other |
+| `text-on-border.svg` | Edge label sitting on a cluster border |
+| `rainbow-colors.svg` | Multi-color clusters with centered labels colliding with arrows |
+| `data-layer-off-center.svg` | Data cluster positioned far from backend |
+
+When iterating on diagram layout, use the test suite as an objective
+function — keep adjusting the Graphviz source until all checks pass.
+
+**Fix patterns for common failures:**
+- Arrow crosses cluster label → add invisible spacer node to widen
+  cluster, pushing the left-justified label away from arrow entry points
+- Text crosses border → remove `xlabel` from cross-connection edges,
+  or add `minlen` to create clearance
+- Labels overlap → increase `nodesep`, use `constraint="false"` on
+  cross-connections, or remove redundant labels
+
 ## Additional References
 
 - @references/bounded-context-naming.md — rules for naming bounded contexts in DDD diagrams
