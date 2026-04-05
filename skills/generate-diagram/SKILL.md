@@ -211,10 +211,13 @@ Default font sizes in diagram libraries are often too small when the
 diagram is embedded in documentation. Bump all text up ~2px from library
 defaults for readability:
 
-- **Titles**: 14-16px
-- **Node labels**: 11-12px
-- **Edge labels / annotations**: 10-11px
-- **Secondary text**: 9-10px
+- **Titles**: 14-16px, bold
+- **Node / participant labels**: 11-12px, bold
+- **Arrow / edge labels**: 11px, bold (especially monospace labels like
+  function calls — normal weight monospace is hard to read at small sizes)
+- **Callout / annotation text**: 10px, weight 500
+- **Secondary text** (separators, hints): 10px, use #555 not #888 for
+  sufficient contrast
 
 ### Complexity Reduction
 

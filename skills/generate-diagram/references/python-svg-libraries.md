@@ -103,3 +103,39 @@ For diagrams that need precise coordinate control (pyramids, custom shapes):
     vertical gap between the center element and the rows above/below it
     is roughly equal. Visually verify and adjust — the bottom row often
     needs to be pushed 10-20px further down than the math suggests.
+
+## Sequence Diagram Patterns (svgwrite)
+
+When building sequence diagrams with svgwrite:
+
+1. **Arrow labels near the source, not centered.** Centering a label
+   between source and target columns causes it to cross intermediate
+   lifelines. Instead, position labels just past the source lifeline
+   (`x1 + 10`) with `text_anchor="start"`. This keeps labels clear of
+   all intermediate vertical lines, regardless of arrow direction.
+
+2. **Widen the diagram for return labels.** Return arrows (right-to-left)
+   need labels to the right of the rightmost lifeline — outside the flow
+   area. Add extra right margin (150-240px) beyond the last column to
+   fit these labels without overflow.
+
+3. **No boxes on inline annotations.** Bordered note boxes around text
+   like "user.balance = 500" add visual clutter with no benefit. Use
+   plain text annotations instead. Reserve bordered shapes for callout
+   notes that sit outside the main flow.
+
+4. **Explanatory callouts as sticky notes outside the flow.** Instead of
+   inline editorial notes ("SAME session!", "data corruption!"), draw a
+   single sticky note (folded-corner rectangle) to the side of the
+   diagram with a dashed connector to the relevant arrow. This keeps the
+   sequence flow clean and puts the explanation where it doesn't compete
+   with the arrows.
+
+5. **Bold monospace at 11px+ for arrow labels.** Default 10px normal
+   weight is too thin for documentation. Use `font_size="11px"` and
+   `font_weight="bold"` on all arrow labels. Callout text should be at
+   least 10px with weight 500.
+
+6. **Separator text at #555, not #888.** Light gray separators
+   ("Greenlet A yields...") become unreadable in documentation. Use
+   `#555555` for sufficient contrast on white backgrounds.
