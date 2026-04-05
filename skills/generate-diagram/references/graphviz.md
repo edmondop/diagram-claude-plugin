@@ -49,16 +49,19 @@ nodes + edges + auto-layout.
    the ones that visibly overlap — it prevents the problem before it appears.
    Combine with generous margins (see tip 3) for best results.
 
-3. **Use generous margins on nested clusters (20+).** Nested clusters
-   with tight margins cause child content to clip the container border.
-   Deeper nesting needs progressively larger margins:
+3. **Use generous margins on nested clusters (24+).** Nested clusters
+   with tight margins cause two problems: child content clips the
+   container border, and `xlabel` labels on edges leaving the cluster
+   overlap with the border. The outermost container needs the most margin
+   because its border sits between the last internal node and the first
+   external node — any edge labels in that gap collide with the border:
    ```python
-   # Outer cluster
-   outer.attr(margin="24")
-   # Inner cluster
-   inner.attr(margin="20")
+   # Outermost cluster — biggest margin, border must clear xlabels
+   outer.attr(margin="36")
+   # Middle cluster
+   middle.attr(margin="24")
    # Innermost cluster
-   innermost.attr(margin="14")
+   inner.attr(margin="24")
    ```
 
 4. **Cluster labels overlap node content when the cluster is narrow.**
