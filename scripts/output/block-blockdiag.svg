@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg viewBox="0 0 1900 260" xmlns="http://www.w3.org/2000/svg" xmlns:inkspace="http://www.inkscape.org/namespaces/inkscape" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs id="defs_block">
+    <filter height="1.504" id="filter_blur" inkspace:collect="always" width="1.1575" x="-0.07875" y="-0.252">
+      <feGaussianBlur id="feGaussianBlur3780" inkspace:collect="always" stdDeviation="4.2" />
+    </filter>
+  </defs>
+  <title>blockdiag</title>
+  <desc />
+  <rect fill="rgb(236,239,241)" height="70" style="filter:url(#filter_blur)" width="460" x="70" y="45" />
+  <rect fill="rgb(255,248,225)" height="170" style="filter:url(#filter_blur)" width="720" x="590" y="45" />
+  <rect fill="rgb(255,235,238)" height="70" style="filter:url(#filter_blur)" width="460" x="1370" y="45" />
+  <path d="M 91 66 L 255 66 A8,8 0 0 1 263 74 L 263 98 A8,8 0 0 1 255 106 L 91 106 A8,8 0 0 1 83 98 L 83 74 A8,8 0 0 1 91 66" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" />
+  <path d="M 351 66 L 515 66 A8,8 0 0 1 523 74 L 523 98 A8,8 0 0 1 515 106 L 351 106 A8,8 0 0 1 343 98 L 343 74 A8,8 0 0 1 351 66" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="180" x="603" y="66" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="180" x="603" y="166" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="180" x="863" y="66" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="180" x="1123" y="66" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="180" x="1383" y="66" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="180" x="1643" y="66" />
+  <path d="M 88 60 L 252 60 A8,8 0 0 1 260 68 L 260 92 A8,8 0 0 1 252 100 L 88 100 A8,8 0 0 1 80 92 L 80 68 A8,8 0 0 1 88 60" fill="rgb(232,245,233)" stroke="rgb(0,0,0)" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="70" x="170.0" y="87">Web Client</text>
+  <path d="M 348 60 L 512 60 A8,8 0 0 1 520 68 L 520 92 A8,8 0 0 1 512 100 L 348 100 A8,8 0 0 1 340 92 L 340 68 A8,8 0 0 1 348 60" fill="rgb(227,242,253)" stroke="rgb(0,0,0)" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="92" x="430.0" y="87">Load Balancer</text>
+  <rect fill="rgb(227,242,253)" height="40" stroke="rgb(0,0,0)" width="180" x="600" y="60" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="85" x="690.5" y="87">Web Server 1</text>
+  <rect fill="rgb(227,242,253)" height="40" stroke="rgb(0,0,0)" width="180" x="600" y="160" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="85" x="690.5" y="187">Web Server 2</text>
+  <rect fill="rgb(255,243,224)" height="40" stroke="rgb(0,0,0)" width="180" x="860" y="60" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="70" x="950.0" y="87">App Server</text>
+  <rect fill="rgb(243,229,245)" height="40" stroke="rgb(0,0,0)" width="180" x="1120" y="60" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="1210.0" y="87">Redis Cache</text>
+  <rect fill="rgb(252,228,236)" height="40" stroke="rgb(0,0,0)" width="180" x="1380" y="60" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="70" x="1470.0" y="87">DB Primary</text>
+  <rect fill="rgb(252,228,236)" height="40" stroke="rgb(0,0,0)" stroke-dasharray="4" width="180" x="1640" y="60" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="70" x="1730.0" y="87">DB Replica</text>
+  <path d="M 260 80 L 332 80" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="339,80 332,76 332,84 339,80" stroke="rgb(0,0,0)" />
+  <path d="M 520 80 L 592 80" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="599,80 592,76 592,84 599,80" stroke="rgb(0,0,0)" />
+  <path d="M 520 80 L 560 80" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 560 80 L 560 180" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 560 180 L 592 180" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="599,180 592,176 592,184 599,180" stroke="rgb(0,0,0)" />
+  <path d="M 780 80 L 852 80" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="859,80 852,76 852,84 859,80" stroke="rgb(0,0,0)" />
+  <path d="M 780 180 L 840 180" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 840 180 L 840 80" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 840 80 L 852 80" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="859,80 852,76 852,84 859,80" stroke="rgb(0,0,0)" />
+  <path d="M 1040 80 L 1112 80" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1119,80 1112,76 1112,84 1119,80" stroke="rgb(0,0,0)" />
+  <path d="M 1040 80 L 1080 80" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1080 80 L 1080 130" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1080 130 L 1360 130" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1360 130 L 1360 80" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1360 80 L 1372 80" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1379,80 1372,76 1372,84 1379,80" stroke="rgb(0,0,0)" />
+  <path d="M 1560 80 L 1632 80" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="1639,80 1632,76 1632,84 1639,80" stroke="rgb(0,0,0)" />
+  <rect fill="white" height="17" stroke="rgb(0,0,0)" width="72" x="1564" y="55" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="56" x="1600.0" y="70">repl ...</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="21" x="300.5" y="52">DMZ</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="113" x="950.5" y="52">Application Tier</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="63" x="1600.5" y="52">Data Tier</text>
+</svg>

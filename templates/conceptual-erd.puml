@@ -1,0 +1,47 @@
+@startuml conceptual_erd
+skinparam backgroundColor transparent
+skinparam class {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 14
+  BorderThickness 2
+}
+
+hide methods
+hide stereotypes
+
+entity "Region" as region
+entity "Fulfillment Cycle" as cycle
+entity "Store" as store
+entity "Warehouse" as warehouse
+entity "Product Category" as category
+entity "Order Assignment" as assignment
+entity "Hold" as hold
+
+region "1" -- "0..*" cycle : owns
+region "1" -- "0..*" store : contains
+cycle "1" -- "0..*" assignment : composed of
+cycle "1" -- "0..*" hold : can hold
+store "1" -- "0..*" assignment : has
+warehouse "1" -- "0..*" category : provides
+warehouse "1" -- "0..*" hold : can be held
+category "1" -- "0..*" assignment : capacity forecasted in
+
+note right of assignment
+  Core entity: one week of
+  actual/forecast/capacity for a specific
+  store and product category
+
+  Path: Warehouse -> Category
+        -> Assignment -> Cycle -> Region
+end note
+
+note right of hold
+  Holds prevent changes to
+  a single warehouse within a cycle
+
+  Applied per fulfillment cycle
+end note
+
+@enduml

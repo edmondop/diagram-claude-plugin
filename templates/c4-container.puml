@@ -1,0 +1,31 @@
+@startuml c4_container_order_fulfillment
+!include <C4/C4_Container>
+
+LAYOUT_LEFT_RIGHT()
+
+title Container Diagram - Order Fulfillment System
+
+Person(users, "Users", "Warehouse Manager, Store Owner, Supplier, Operations Director")
+
+System_Boundary(ofs, "Order Fulfillment System") {
+    Container(frontend, "Web Application", "TypeScript/React", "User interface for fulfillment operations")
+    Container(backend, "Backend API", "Java/Spring Boot", "GraphQL API for fulfillment operations")
+    ContainerDb(database, "PostgreSQL Database", "PostgreSQL", "Orders, assignments, warehouses, shipments, user roles")
+}
+
+System_Ext(analytics, "Analytics Warehouse", "Historical order data")
+System_Ext(pricing, "Pricing Engine", "Shipping rates")
+System_Ext(payment, "Payment Processing System", "Payment capture and settlement")
+System_Ext(admin, "Admin Dashboard", "Internal operations platform")
+
+Rel(users, frontend, "Uses", "HTTPS")
+Rel(frontend, admin, "Integrated with")
+Rel(frontend, backend, "Queries/mutations", "GraphQL/HTTPS")
+
+Rel(backend, database, "Reads/writes", "SQL/JPA")
+Rel(backend, analytics, "Queries order history", "SQL")
+Rel(backend, pricing, "Queries shipping rates", "REST API")
+Rel(backend, payment, "Confirms payment", "REST API")
+
+SHOW_LEGEND()
+@enduml

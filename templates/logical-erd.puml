@@ -1,0 +1,88 @@
+@startuml logical_erd_fulfillment_cycle
+skinparam backgroundColor transparent
+skinparam class {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 11
+}
+
+title Logical ERD - Fulfillment Cycle and Assignments (Partial)
+
+entity "FulfillmentCycle" as cycle {
+  * id : UUID
+  --
+  * region : VARCHAR
+  * fiscal_year : INTEGER
+  * status : ENUM
+  * creator : VARCHAR
+  * created_at : TIMESTAMP
+  approved_at : TIMESTAMP
+}
+
+entity "CapacityTarget" as target {
+  * fulfillment_cycle_id : UUID (FK)
+  * warehouse : VARCHAR
+  --
+  * amount : DECIMAL
+}
+
+entity "Store" as store {
+  * name : VARCHAR
+  --
+  * category : VARCHAR
+  * owner : VARCHAR
+}
+
+entity "FulfillmentAssignment" as assignment {
+  * fulfillment_cycle_id : UUID (FK)
+  * year : INTEGER
+  * week : INTEGER
+  * store_name : VARCHAR (FK)
+  --
+  * assignment_type : ENUM
+}
+
+entity "ElectronicsAllocation" as electronics {
+  * sku_group : VARCHAR
+  * fulfillment_cycle_id : UUID (FK)
+  * year, week : INTEGER
+  * store_name : VARCHAR
+  --
+  * amount, units : DECIMAL
+  growth_rate : DECIMAL
+}
+
+entity "ApparelAllocation" as apparel {
+  * apparel_category : VARCHAR
+  * fulfillment_cycle_id : UUID (FK)
+  * year, week : INTEGER
+  * store_name : VARCHAR
+  --
+  * amount, units : DECIMAL
+  growth_rate : DECIMAL
+}
+
+entity "Hold" as hold {
+  * fulfillment_cycle_id : UUID (FK)
+  * warehouse : VARCHAR
+}
+
+cycle ||--o{ target : "has capacity targets"
+cycle ||--o{ assignment : "composed of"
+cycle ||--o{ hold : "can hold warehouses"
+
+store ||--o{ assignment : "has assignments"
+
+assignment ||--o{ electronics : "detailed by"
+assignment ||--o{ apparel : "detailed by"
+
+note right of assignment
+  **FulfillmentAssignment:**
+  Aggregates allocations across
+  all product categories for
+  a store in a given week
+end note
+
+
+@enduml

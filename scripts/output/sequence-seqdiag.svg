@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg viewBox="0 0 1036 530" xmlns="http://www.w3.org/2000/svg" xmlns:inkspace="http://www.inkscape.org/namespaces/inkscape" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs id="defs_block">
+    <filter height="1.504" id="filter_blur" inkspace:collect="always" width="1.1575" x="-0.07875" y="-0.252">
+      <feGaussianBlur id="feGaussianBlur3780" inkspace:collect="always" stdDeviation="4.2" />
+    </filter>
+  </defs>
+  <title>blockdiag</title>
+  <desc />
+  <rect fill="rgb(0,0,0)" height="435" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="127" y="87" />
+  <rect fill="rgb(0,0,0)" height="318" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="131" y="204" />
+  <rect fill="rgb(0,0,0)" height="32" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="135" y="490" />
+  <rect fill="rgb(0,0,0)" height="435" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="387" y="87" />
+  <rect fill="rgb(0,0,0)" height="357" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="391" y="165" />
+  <rect fill="rgb(0,0,0)" height="227" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="395" y="295" />
+  <rect fill="rgb(0,0,0)" height="149" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="399" y="373" />
+  <rect fill="rgb(0,0,0)" height="71" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="403" y="451" />
+  <rect fill="rgb(0,0,0)" height="396" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="647" y="126" />
+  <rect fill="rgb(0,0,0)" height="188" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="651" y="334" />
+  <rect fill="rgb(0,0,0)" height="110" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="907" y="412" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="67" y="18" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="327" y="18" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="587" y="18" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="847" y="18" />
+  <path d="M 128 52 L 128 532" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="435" stroke="rgb(0,0,0)" width="8" x="124" y="81" />
+  <rect fill="moccasin" height="318" stroke="rgb(0,0,0)" width="8" x="128" y="198" />
+  <rect fill="moccasin" height="32" stroke="rgb(0,0,0)" width="8" x="132" y="484" />
+  <path d="M 388 52 L 388 532" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="435" stroke="rgb(0,0,0)" width="8" x="384" y="81" />
+  <rect fill="moccasin" height="357" stroke="rgb(0,0,0)" width="8" x="388" y="159" />
+  <rect fill="moccasin" height="227" stroke="rgb(0,0,0)" width="8" x="392" y="289" />
+  <rect fill="moccasin" height="149" stroke="rgb(0,0,0)" width="8" x="396" y="367" />
+  <rect fill="moccasin" height="71" stroke="rgb(0,0,0)" width="8" x="400" y="445" />
+  <path d="M 648 52 L 648 532" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="396" stroke="rgb(0,0,0)" width="8" x="644" y="120" />
+  <rect fill="moccasin" height="188" stroke="rgb(0,0,0)" width="8" x="648" y="328" />
+  <path d="M 908 52 L 908 532" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="110" stroke="rgb(0,0,0)" width="8" x="904" y="406" />
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="64" y="12" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="49" x="128.5" y="39">Browser</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="324" y="12" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="388.0" y="39">API Gateway</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="584" y="12" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="85" x="648.5" y="39">Auth Service</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="844" y="12" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="908.0" y="39">Backend API</text>
+  <path d="M 136 81 L 380 81" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="372,77 380,81 372,85" stroke="rgb(0,0,0)" />
+  <path d="M 396 120 L 640 120" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="632,116 640,120 632,124" stroke="rgb(0,0,0)" />
+  <path d="M 400 159 L 640 159" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="408,155 400,159 408,163" stroke="rgb(0,0,0)" />
+  <path d="M 140 198 L 380 198" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="148,194 140,198 148,202" stroke="rgb(0,0,0)" />
+  <path d="M 140 289 L 380 289" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="372,285 380,289 372,293" stroke="rgb(0,0,0)" />
+  <path d="M 404 328 L 640 328" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="632,324 640,328 632,332" stroke="rgb(0,0,0)" />
+  <path d="M 408 367 L 640 367" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="416,363 408,367 416,371" stroke="rgb(0,0,0)" />
+  <path d="M 408 406 L 900 406" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="892,402 900,406 892,410" stroke="rgb(0,0,0)" />
+  <path d="M 412 445 L 900 445" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="420,441 412,445 420,449" stroke="rgb(0,0,0)" />
+  <path d="M 144 484 L 380 484" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="152,480 144,484 152,488" stroke="rgb(0,0,0)" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="183.0" y="77">POST /login</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="141" x="474.5" y="116">Validate credentials</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="63" x="604.5" y="155">JWT token</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="134" x="309.0" y="194">200 OK + Set-Cookie</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="127" x="211.5" y="285">GET /data (Bearer)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="70" x="447.0" y="324">Verify JWT</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="597.0" y="363">Token valid</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="106" x="469.0" y="402">Fetch user data</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="85" x="853.5" y="441">JSON payload</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="92" x="330.0" y="480">200 OK + JSON</text>
+  <path d="M 40 237 L 426 237" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 40 241 L 426 241" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 609 237 L 996 237" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 609 241 L 996 241" fill="none" stroke="rgb(0,0,0)" />
+  <rect fill="rgb(208,208,208)" height="21" stroke="rgb(0,0,0)" width="183" x="426" y="229" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="13" font-style="normal" font-weight="normal" text-anchor="middle" textLength="163" x="517.5" y="246">Authentication complete</text>
+</svg>

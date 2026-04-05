@@ -1,0 +1,15 @@
+{
+  "name": "diagram-claude-plugin",
+  "description": "Generate professional diagrams from natural language using the best-fit Python library for each diagram type",
+  "owner": {
+    "name": "Edmondo Porcu"
+  },
+  "plugins": [
+    {
+      "name": "diagram-claude-plugin",
+      "description": "Generate diagrams via Python scripts, PlantUML, Draw.io, and Excalidraw — routes to the best tool for each diagram type",
+      "version": "0.2.0",
+      "source": "./"
+    }
+  ]
+}

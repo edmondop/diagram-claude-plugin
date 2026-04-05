@@ -1,0 +1,41 @@
+@startwbs subdomain_context
+skinparam backgroundColor transparent
+skinparam node {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 14
+}
+skinparam arrow {
+  Color #24428b
+}
+
+<style>
+wbsDiagram {
+  .inScope {
+    BackgroundColor #fff8dc
+    BorderColor #ff8c00
+    FontStyle bold
+  }
+}
+</style>
+
+* ShopFlow Inc
+** Customer Management
+*** Customer Profiles
+** Product Catalog
+*** Category Management
+*** Pricing
+** Order Management
+*** Order Processing
+*** Payment Processing
+*** Shipping and Logistics
+**** Carrier Integration
+**** Route Optimization
+**** Cost Tracking
+**** Demand Forecasting
+**** Capacity Planning
+**** Fulfillment Planning
+***** Automated Fulfillment <<inScope>>
+***** Manual Fulfillment
+@endwbs

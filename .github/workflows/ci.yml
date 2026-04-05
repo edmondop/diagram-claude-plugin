@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uvx ruff check scripts/
+      - run: uvx ruff format --check scripts/
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uvx pyrefly check --ignore missing-import --ignore missing-source-for-stubs --ignore missing-attribute scripts/
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npx markdownlint-cli2 "**/*.md" "#node_modules"
+
+  validate-plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node scripts/validate-plugin.js ./
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+      - name: Run all scripts
+        run: |
+          cd scripts
+          # blockdiag/seqdiag are unmaintained and incompatible with Pillow 10+
+          SKIP="block-blockdiag.py sequence-seqdiag.py"
+          for script in *.py; do
+            if echo "$SKIP" | grep -qw "$script"; then
+              echo "::warning::Skipping $script (unmaintained, requires Pillow<10)"
+              continue
+            fi
+            echo "::group::$script"
+            uv run "$script"
+            echo "::endgroup::"
+          done
+      - name: Verify output files
+        run: |
+          count=$(ls scripts/output/*.svg scripts/output/*.png 2>/dev/null | wc -l)
+          echo "Generated $count output files"
+          ls -la scripts/output/
+          if [ "$count" -lt 12 ]; then
+            echo "Expected at least 12 output files, got $count"
+            exit 1
+          fi

@@ -1,0 +1,49 @@
+@startuml add_product_category
+skinparam backgroundColor transparent
+skinparam activity {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 14
+}
+
+|User|
+start
+:Click "Add New Product Category";
+
+|System|
+:Retrieve Available\nProduct Categories;
+note right
+  Query available inventory
+  to determine which
+  categories can be added
+
+  Independent of current
+  fulfillment cycle, same for all
+  fulfillment cycles
+end note
+
+
+
+|User|
+:Select Product Category;
+note right
+  Example:
+  - Electronics > Laptops
+  - Apparel > Winter Jackets
+  - Home > Kitchen Appliances
+end note
+
+|System|
+:Create Category Entry;
+note right
+  Initialize all weeks to 0:
+  - Week 1: 0 units, $0
+  - Week 2: 0 units, $0
+  - ... (all 52 weeks)
+end note
+
+
+stop
+
+@enduml

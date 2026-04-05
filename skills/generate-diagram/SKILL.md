@@ -1,0 +1,189 @@
+---
+name: generate-diagram
+description: Use when generating diagrams, charts, or technical illustrations.
+  Triggers on "create a diagram", "draw a flowchart", "generate an ERD",
+  "make an architecture diagram", "sequence diagram", "state machine diagram",
+  "block diagram", "pyramid diagram", "DAG", "C4 diagram", "context map",
+  "use case diagram", "activity diagram", "subdomain decomposition",
+  "excalidraw", "hand-drawn diagram", "sketch diagram",
+  or any request for visual/graphical output in SVG or PNG format.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+version: 0.2.0
+---
+
+# Diagram Generation
+
+Generate professional diagrams by routing each request to the best-fit
+tool. For UML, C4, and DDD diagram types, use **PlantUML** (text-based,
+standard notation). For everything else, use Python libraries via `uv`
+inline scripts. For editable hand-drawn diagrams, use **Excalidraw** JSON.
+
+## Interaction Protocol
+
+1. **Classify** the diagram type. If ambiguous, ask:
+   > What kind of diagram?
+   > - C4 (Context / Container / Component)
+   > - UML Use Case
+   > - UML Activity / BPMN-style workflow
+   > - UML State Machine
+   > - DDD Context Map
+   > - Subdomain Decomposition (WBS)
+   > - ERD (Conceptual or Logical)
+   > - Flowchart / pipeline
+   > - Architecture (generic boxes + arrows)
+   > - Cloud/infra architecture (AWS, GCP, K8s icons)
+   > - Pyramid / stacked layers
+   > - Sequence diagram
+   > - Network / DAG
+   > - Block diagram
+   > - Excalidraw (editable, hand-drawn sketch style)
+
+2. **Pick the tool** from the routing table. For PlantUML types,
+   do NOT offer Python alternatives — PlantUML is the only correct
+   choice for standard notation. Skip to step 3.
+
+3. **Ask output path**: "Where should I save the diagram?"
+   Default to current directory if the user doesn't specify.
+
+4. **Check prerequisites** based on the tool:
+
+   For **PlantUML**:
+   ```bash
+   plantuml -version 2>/dev/null || docker image inspect plantuml/plantuml-cli:plantuml-cli-v1.0.1 >/dev/null 2>&1
+   ```
+   If neither is available, show:
+   - macOS: `brew install plantuml`
+   - Docker: `docker pull plantuml/plantuml-cli:plantuml-cli-v1.0.1`
+   - **Do NOT fall back to a Python approximation.** Stop and ask the
+     user to install one of the above.
+
+   For **Graphviz-dependent** Python libraries:
+   ```bash
+   dot -V
+   ```
+
+5. **Load the relevant reference** for the tool you picked (see below).
+   Generate the diagram following that reference.
+   - PlantUML: write a `.puml` file, render with `plantuml -tsvg`
+     or Docker. Open the SVG.
+   - Python: write a `uv run`-compatible inline script. Run it. Open
+     the SVG.
+   - Excalidraw: write a `.excalidraw` JSON file. Open it.
+
+6. **Iterate** on user feedback.
+
+## Routing Table
+
+### PlantUML (standard notation — no alternatives)
+
+| Diagram type                    | Template                           |
+|---------------------------------|------------------------------------|
+| C4 Context Diagram              | `templates/c4-context.puml`        |
+| C4 Container Diagram            | `templates/c4-container.puml`      |
+| UML Use Case                    | `templates/use-case.puml`          |
+| UML Use Case (detailed)         | `templates/use-case-detailed.puml` |
+| UML Activity Diagram            | `templates/activity-diagram.puml`  |
+| UML Activity (with decisions)   | `templates/activity-diagram-decision.puml` |
+| UML State Machine               | `templates/state-machine.puml`     |
+| DDD Context Map                 | `templates/context-map.puml`       |
+| Subdomain Decomposition (WBS)   | `templates/subdomain-decomposition.puml` |
+| Conceptual ERD                  | `templates/conceptual-erd.puml`    |
+| Logical ERD                     | `templates/logical-erd.puml`       |
+| Logical ERD (changelog pattern) | `templates/logical-erd-changelog.puml` |
+| Logical ERD (users/roles)       | `templates/logical-erd-users.puml` |
+
+**Reference:** @references/plantuml.md
+
+### Python libraries (custom diagrams)
+
+| Diagram type             | Primary                   | Alternative(s)              | When to pick alternative                          |
+|--------------------------|---------------------------|-----------------------------|---------------------------------------------------|
+| Flowchart / pipeline     | graphviz                  | schemdraw                   | No Graphviz installed; simple linear flow          |
+| Generic architecture     | graphviz                  | grandalf + drawsvg          | No Graphviz installed; pure Python                 |
+| Cloud/infra architecture | diagrams (mingrammer)     | graphviz                    | Don't need cloud provider icons                    |
+| Pyramid / stacked layers | svgwrite                  | drawsvg                     | Prefer cleaner API, less precise control needed    |
+| Sequence diagram         | seqdiag                   | svgwrite                    | seqdiag for speed; svgwrite for full control       |
+| Network / graph (cyclic) | networkx + matplotlib     | grandalf + drawsvg          | Pure Python auto-layout without matplotlib         |
+| DAG (acyclic pipeline)   | svgwrite                  | graphviz                    | graphviz for auto-layout; svgwrite for precision   |
+| Block diagram            | grandalf + drawsvg        | blockdiag, schemdraw, draw.io | blockdiag for DSL; schemdraw for flow; draw.io for editable |
+| Subdomain -> BC mapping  | drawsvg                   | --                            | `@references/examples/subdomain-bc-mapping.py` — bipartite layout |
+
+**References:**
+- @references/graphviz.md — graphviz Python wrapper + layout tips
+- @references/python-svg-libraries.md — svgwrite, drawsvg, schemdraw + coordinate patterns
+- @references/python-diagram-libraries.md — diagrams, seqdiag, blockdiag, networkx, erdantic, grandalf, draw.io
+
+### Excalidraw (editable, hand-drawn sketch)
+
+| Diagram type             | Tool                      |
+|--------------------------|---------------------------|
+| Any (editable, sketch)   | Excalidraw JSON           |
+
+**Reference:** @references/excalidraw.md
+
+### Draw.io (editable, precise)
+
+| Diagram type             | Tool                      |
+|--------------------------|---------------------------|
+| Any (editable, precise)  | draw.io (drawio skill)    |
+
+## Example Scripts
+
+Working examples for each diagram type are in `@references/examples/`.
+Read the relevant example before generating a new diagram:
+
+| Diagram type             | Example script                              |
+|--------------------------|---------------------------------------------|
+| Architecture (generic)   | `@references/examples/architecture-graphviz.py` |
+| Block diagram (blockdiag)| `@references/examples/block-blockdiag.py`       |
+| Block diagram (schemdraw)| `@references/examples/block-schemdraw.py`       |
+| Cloud/infra architecture | `@references/examples/cloud-arch-diagrams.py`   |
+| ERD                      | `@references/examples/erd-graphviz.py`           |
+| Flowchart (graphviz)     | `@references/examples/flowchart-graphviz.py`     |
+| Flowchart (schemdraw)    | `@references/examples/flowchart-schemdraw.py`    |
+| FSM / state machine      | `@references/examples/fsm-graphviz.py`           |
+| Network (graphviz)       | `@references/examples/network-graphviz.py`       |
+| Network (networkx)       | `@references/examples/network-networkx.py`       |
+| Pyramid (drawsvg)        | `@references/examples/pyramid-drawsvg.py`        |
+| Pyramid (svgwrite)       | `@references/examples/pyramid-svgwrite.py`       |
+| Sequence (seqdiag)       | `@references/examples/sequence-seqdiag.py`       |
+| Sequence (svgwrite)      | `@references/examples/sequence-svgwrite.py`      |
+| Subdomain -> BC mapping  | `@references/examples/subdomain-bc-mapping.py`   |
+
+## Script Template (Python libraries only)
+
+All Python scripts use `uv` inline metadata:
+
+```python
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["library-name"]
+# ///
+"""Description of what this diagram shows."""
+from pathlib import Path
+# ... imports ...
+
+def main() -> None:
+    Path("output").mkdir(exist_ok=True)
+    # ... build diagram ...
+    # ... save to output/ ...
+    print(f"Saved: output/filename.svg")
+
+if __name__ == "__main__":
+    main()
+```
+
+## Style Defaults
+
+Unless the user specifies otherwise:
+
+- **Font**: Helvetica, Arial, sans-serif
+- **Stroke**: #333-#555, 1.2-2px
+- **Fills**: muted material-design tones (not neon, not pastel candy)
+- **Text**: black/#333 for labels, #666 for annotations
+- **No gradients, no decorative elements**
+- **PlantUML theme**: transparent background, `#1a5ad7` borders, `#0b2147` text
+
+## Additional References
+
+- @references/bounded-context-naming.md — rules for naming bounded contexts in DDD diagrams

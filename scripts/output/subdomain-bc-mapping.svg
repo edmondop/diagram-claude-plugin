@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1142" height="796" viewBox="0 0 1142 796">
+<defs>
+</defs>
+<rect x="0" y="0" width="1142" height="796" fill="#ffffff" />
+<text x="186.0" y="30" font-size="20" fill="#0f1b2d" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Problem Space</text>
+<text x="186.0" y="50" font-size="12" fill="#444444" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="normal">(Subdomains)</text>
+<text x="752.0" y="30" font-size="20" fill="#0f1b2d" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Solution Space</text>
+<text x="752.0" y="50" font-size="12" fill="#444444" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="normal">(Bounded Contexts / Distinct Systems)</text>
+<rect x="50" y="80" width="272" height="196" rx="7" ry="7" fill="#c4d4eb" stroke="#3b5d8f" stroke-width="1.8" stroke-dasharray="6,3" />
+<text x="62" y="102" font-size="12" fill="#3b5d8f" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Order Management</text>
+<rect x="50" y="296" width="272" height="144" rx="7" ry="7" fill="#d1c2eb" stroke="#6a4290" stroke-width="1.8" stroke-dasharray="6,3" />
+<text x="62" y="318" font-size="12" fill="#6a4290" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Commerce</text>
+<rect x="50" y="460" width="272" height="144" rx="7" ry="7" fill="#ebd1b8" stroke="#9a6530" stroke-width="1.8" stroke-dasharray="6,3" />
+<text x="62" y="482" font-size="12" fill="#9a6530" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Customer Experience</text>
+<rect x="50" y="624" width="272" height="92" rx="7" ry="7" fill="#b8e6cd" stroke="#2d8760" stroke-width="1.8" stroke-dasharray="6,3" />
+<text x="62" y="646" font-size="12" fill="#2d8760" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Financial Operations</text>
+<rect x="66" y="116" width="240" height="42" rx="7" ry="7" fill="#ffffff" stroke="#3b5d8f" stroke-width="1.8" />
+<rect x="67" y="122" width="4" height="30" rx="2" ry="2" fill="#3b5d8f" />
+<text x="190.0" y="142.0" font-size="12.5" fill="#1e3a5f" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Order Fulfillment</text>
+<rect x="66" y="168" width="240" height="42" rx="7" ry="7" fill="#ffffff" stroke="#3b5d8f" stroke-width="1.8" />
+<rect x="67" y="174" width="4" height="30" rx="2" ry="2" fill="#3b5d8f" />
+<text x="190.0" y="194.0" font-size="12.5" fill="#1e3a5f" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Inventory Management</text>
+<rect x="66" y="220" width="240" height="42" rx="7" ry="7" fill="#ffffff" stroke="#3b5d8f" stroke-width="1.8" />
+<rect x="67" y="226" width="4" height="30" rx="2" ry="2" fill="#3b5d8f" />
+<text x="190.0" y="246.0" font-size="12.5" fill="#1e3a5f" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Shipping &amp; Logistics</text>
+<rect x="66" y="332" width="240" height="42" rx="7" ry="7" fill="#ffffff" stroke="#6a4290" stroke-width="1.8" />
+<rect x="67" y="338" width="4" height="30" rx="2" ry="2" fill="#6a4290" />
+<text x="190.0" y="358.0" font-size="12.5" fill="#1e3a5f" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Product Catalog</text>
+<rect x="66" y="384" width="240" height="42" rx="7" ry="7" fill="#ffffff" stroke="#6a4290" stroke-width="1.8" />
+<rect x="67" y="390" width="4" height="30" rx="2" ry="2" fill="#6a4290" />
+<text x="190.0" y="410.0" font-size="12.5" fill="#1e3a5f" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Pricing &amp; Promotions</text>
+<rect x="66" y="496" width="240" height="42" rx="7" ry="7" fill="#ffffff" stroke="#9a6530" stroke-width="1.8" />
+<rect x="67" y="502" width="4" height="30" rx="2" ry="2" fill="#9a6530" />
+<text x="190.0" y="522.0" font-size="12.5" fill="#1e3a5f" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Customer Management</text>
+<rect x="66" y="548" width="240" height="42" rx="7" ry="7" fill="#ffffff" stroke="#9a6530" stroke-width="1.8" />
+<rect x="67" y="554" width="4" height="30" rx="2" ry="2" fill="#9a6530" />
+<text x="190.0" y="574.0" font-size="12.5" fill="#1e3a5f" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Returns &amp; Refunds</text>
+<rect x="66" y="660" width="240" height="42" rx="7" ry="7" fill="#ffffff" stroke="#2d8760" stroke-width="1.8" />
+<rect x="67" y="666" width="4" height="30" rx="2" ry="2" fill="#2d8760" />
+<text x="190.0" y="686.0" font-size="12.5" fill="#1e3a5f" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Payment Processing</text>
+<rect x="622" y="157.0" width="260" height="48" rx="7" ry="7" fill="#1b3a5c" stroke="#0f2740" stroke-width="1.6" />
+<text x="752.0" y="186.0" font-size="12.5" fill="#ffffff" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Order Fulfillment</text>
+<rect x="622" y="219.0" width="260" height="48" rx="7" ry="7" fill="#1b3a5c" stroke="#0f2740" stroke-width="1.6" />
+<text x="752.0" y="248.0" font-size="12.5" fill="#ffffff" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Warehouse Management</text>
+<rect x="622" y="281.0" width="260" height="48" rx="7" ry="7" fill="#1b3a5c" stroke="#0f2740" stroke-width="1.6" />
+<text x="752.0" y="310.0" font-size="12.5" fill="#ffffff" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Product Catalog</text>
+<rect x="622" y="343.0" width="260" height="48" rx="7" ry="7" fill="#1b3a5c" stroke="#0f2740" stroke-width="1.6" />
+<text x="752.0" y="372.0" font-size="12.5" fill="#ffffff" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Pricing</text>
+<rect x="622" y="405.0" width="260" height="48" rx="7" ry="7" fill="#1b3a5c" stroke="#0f2740" stroke-width="1.6" />
+<text x="752.0" y="434.0" font-size="12.5" fill="#ffffff" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Promotion Management</text>
+<rect x="622" y="467.0" width="260" height="48" rx="7" ry="7" fill="#1b3a5c" stroke="#0f2740" stroke-width="1.6" />
+<text x="752.0" y="496.0" font-size="12.5" fill="#ffffff" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Customer Management</text>
+<rect x="622" y="529.0" width="260" height="48" rx="7" ry="7" fill="#1b3a5c" stroke="#0f2740" stroke-width="1.6" />
+<text x="752.0" y="558.0" font-size="12.5" fill="#ffffff" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Returns &amp; Refunds Handling</text>
+<rect x="622" y="591.0" width="260" height="48" rx="7" ry="7" fill="#1b3a5c" stroke="#0f2740" stroke-width="1.6" />
+<text x="752.0" y="620.0" font-size="12.5" fill="#ffffff" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold">Payment Processing</text>
+<path d="M306,137.0 C464.0,137.0,464.0,181.0,622,181.0" fill="none" stroke="#5a7fbf" stroke-width="2.2" stroke-opacity="0.55" />
+<path d="M306,189.0 C464.0,189.0,464.0,243.0,622,243.0" fill="none" stroke="#c0392b" stroke-width="3.0" stroke-opacity="0.55" />
+<path d="M306,241.0 C464.0,241.0,464.0,243.0,622,243.0" fill="none" stroke="#c0392b" stroke-width="3.0" stroke-opacity="0.55" />
+<path d="M306,353.0 C464.0,353.0,464.0,305.0,622,305.0" fill="none" stroke="#5a7fbf" stroke-width="2.2" stroke-opacity="0.55" />
+<path d="M306,405.0 C464.0,405.0,464.0,367.0,622,367.0" fill="none" stroke="#1a8a4a" stroke-width="3.0" stroke-opacity="0.55" />
+<path d="M306,405.0 C464.0,405.0,464.0,429.0,622,429.0" fill="none" stroke="#1a8a4a" stroke-width="3.0" stroke-opacity="0.55" />
+<path d="M306,517.0 C464.0,517.0,464.0,491.0,622,491.0" fill="none" stroke="#5a7fbf" stroke-width="2.2" stroke-opacity="0.55" />
+<path d="M306,569.0 C464.0,569.0,464.0,553.0,622,553.0" fill="none" stroke="#5a7fbf" stroke-width="2.2" stroke-opacity="0.55" />
+<path d="M306,681.0 C464.0,681.0,464.0,615.0,622,615.0" fill="none" stroke="#5a7fbf" stroke-width="2.2" stroke-opacity="0.55" />
+<rect x="892" y="211.0" width="220" height="59" rx="7" ry="7" fill="#c0392b" stroke="#c0392b" stroke-width="1.0" />
+<rect x="892" y="211.0" width="220" height="59" rx="7" ry="7" fill="#ffffff" fill-opacity="0.92" stroke="#c0392b" stroke-width="1.0" stroke-opacity="0.3" />
+<text x="900" y="228.0" font-size="11" fill="#c0392b" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="600">N:1 — Two subdomains merged</text>
+<text x="900" y="243.0" font-size="11" fill="#c0392b" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="600">into one BC. Risk of coupled,</text>
+<text x="900" y="258.0" font-size="11" fill="#c0392b" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="600">tangled logic across concerns.</text>
+<rect x="892" y="341.5" width="220" height="74" rx="7" ry="7" fill="#1a8a4a" stroke="#1a8a4a" stroke-width="1.0" />
+<rect x="892" y="341.5" width="220" height="74" rx="7" ry="7" fill="#ffffff" fill-opacity="0.92" stroke="#1a8a4a" stroke-width="1.0" stroke-opacity="0.3" />
+<text x="900" y="358.5" font-size="11" fill="#1a8a4a" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="600">1:N — One subdomain split into</text>
+<text x="900" y="373.5" font-size="11" fill="#1a8a4a" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="600">focused systems. Independent teams</text>
+<text x="900" y="388.5" font-size="11" fill="#1a8a4a" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="600">can evolve pricing and campaigns</text>
+<text x="900" y="403.5" font-size="11" fill="#1a8a4a" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="600">at different speeds.</text>
+<path d="M50,766 L80,766" stroke="#5a7fbf" stroke-width="3" stroke-opacity="0.6" />
+<text x="88" y="770" font-size="11" fill="#444444" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="normal">1 : 1 — clean alignment</text>
+<path d="M310,766 L340,766" stroke="#1a8a4a" stroke-width="3" stroke-opacity="0.6" />
+<text x="348" y="770" font-size="11" fill="#444444" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="normal">1 : N — intentional split</text>
+<path d="M570,766 L600,766" stroke="#c0392b" stroke-width="3" stroke-opacity="0.6" />
+<text x="608" y="770" font-size="11" fill="#444444" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-weight="normal">N : 1 — conflation risk</text>
+</svg>

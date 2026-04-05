@@ -1,0 +1,45 @@
+@startuml logical_erd_user_roles
+skinparam backgroundColor transparent
+skinparam class {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 12
+}
+
+title Logical ERD - User and Roles
+
+entity "User" as user {
+  * username : VARCHAR
+}
+
+entity "UserRole" as user_role {
+  * id : INTEGER
+  --
+  * username : VARCHAR (FK)
+  * role_type : ENUM
+  warehouse : VARCHAR
+  region : VARCHAR
+}
+
+user ||--o{ user_role : "has multiple roles"
+
+note right of user_role
+  **Role Types:**
+  - admin (no constraints)
+  - warehouse_manager (requires region)
+  - store_owner (requires warehouse)
+
+  **Constraints:**
+  - User can have multiple roles
+  - Each role scoped to warehouse OR region
+  - Unique per (username, role_type, warehouse)
+  - Unique per (username, role_type, region)
+
+  **Examples:**
+  - Alice: warehouse_manager for region "West"
+  - Alice: store_owner for warehouse "LAX-01"
+  - Bob: admin (no scope restrictions)
+end note
+
+@enduml

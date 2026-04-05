@@ -1,0 +1,61 @@
+@startuml context_map
+skinparam backgroundColor transparent
+skinparam rectangle {
+  BackgroundColor #ffffff
+  BorderColor #1a5ad7
+  FontColor #0b2147
+  FontSize 14
+}
+
+rectangle "Order Fulfillment\nContext" as OF #lightblue
+rectangle "Payment Processing\nContext" as PP
+rectangle "Analytics Warehouse\nContext" as AW
+rectangle "Pricing Engine\nContext" as PE
+
+OF -down-> PP : **[U]** Order Fulfillment\n**[D]** Payment Processing\nPublished Language\n"Confirm Payment" API
+
+AW -right-> OF : **[U]** Analytics Warehouse\n**[D]** Order Fulfillment\nCustomer-Supplier + Partnership\nPurpose-built order history view
+
+PE -down-> OF : **[U]** Pricing Engine\n**[D]** Order Fulfillment\nCustomer-Supplier + ACL\nRate queries with translation
+
+note right of PP
+  **Published Language:**
+  Well-defined REST API contract
+  for confirming payment status
+  before shipping
+end note
+
+note right of AW
+  **Partnership:**
+  Analytics team designs a
+  purpose-built view for
+  Order Fulfillment's needs
+
+  Query via SQL
+end note
+
+note right of PE
+  **Anti-Corruption Layer:**
+  Pricing Engine provides
+  shipping rate tables
+
+  Order Fulfillment uses ACL to:
+  - Query rates for standard shipping
+  - Add calculated rates for express
+    and international shipping
+    not in rate tables
+
+  Prevents coupling to external schema
+end note
+
+legend right
+  **Integration Patterns:**
+  Published Language: Well-defined API
+  Partnership: Collaborative interface design
+  ACL: Translation layer to isolate from external model
+
+  **[U] = Upstream (Provider/Supplier)**
+  **[D] = Downstream (Consumer/Customer)**
+endlegend
+
+@enduml
