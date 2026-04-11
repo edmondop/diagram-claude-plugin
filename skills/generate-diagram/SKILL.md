@@ -241,6 +241,35 @@ group element). It does **not** apply to:
 
 For non-Graphviz diagrams, visual inspection is the only verification.
 
+### Source linting (edge label padding)
+
+**Also a hard requirement.** Every graphviz diagram script must pass
+`lint_diagram_source.py` before the diagram is considered done.
+
+On vertical edges, graphviz places `label` text flush against the arrow
+line — making it hard to read. Every edge `label`, `xlabel`, `headlabel`,
+and `taillabel` must have at least 2 spaces of padding on each side of
+every line. For multi-line labels, each line must be padded independently.
+
+```bash
+# Lint a single script
+uv run @references/examples/lint_diagram_source.py my-diagram.py
+
+# Lint all scripts in a directory
+uv run @references/examples/lint_diagram_source.py docs/diagrams/
+```
+
+The linter uses Python's AST to find `.edge()` calls and check string
+literal arguments. It only scans files that `import graphviz`.
+
+```python
+# BAD — label hugs the arrow line
+dot.edge("a", "b", label="shared\nsecret")
+
+# GOOD — padded with spaces
+dot.edge("a", "b", label="  shared  \n  secret  ")
+```
+
 ## Style Defaults
 
 Unless the user specifies otherwise:
