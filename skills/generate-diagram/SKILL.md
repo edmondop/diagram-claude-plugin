@@ -266,9 +266,16 @@ literal arguments. It only scans files that `import graphviz`.
 # BAD — label hugs the arrow line
 dot.edge("a", "b", label="shared\nsecret")
 
-# GOOD — padded with spaces
+# GOOD — padded with spaces (works for dot engine)
 dot.edge("a", "b", label="  shared  \n  secret  ")
 ```
+
+**Exception for `neato`/`fdp`/`sfdp` engines:** Space padding only helps
+with the `dot` engine (vertical/horizontal edges). For force-directed
+layouts (`neato`, `fdp`, `sfdp`), edges are at arbitrary angles so
+horizontal padding doesn't move text away from the line. Use `xlabel`
+instead of `label` and set `forcelabels="true"` at graph level — this
+tells graphviz to place labels *beside* edges with collision avoidance.
 
 ## Style Defaults
 
