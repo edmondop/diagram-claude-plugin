@@ -35,6 +35,7 @@ PATH_SAMPLES = 200
 ARROW_TEXT_PADDING = 2.0  # px inflation around text when checking arrow crossing
 BORDER_STROKE_WIDTH = 2.0  # px stroke width for border overlap checks
 MAX_CENTER_OFFSET_RATIO = 0.7
+MIN_EDGE_LABEL_DISTANCE = 8.0  # px minimum gap between an edge label and its own edge path
 
 
 # ---------------------------------------------------------------------------
@@ -296,12 +297,47 @@ def check_label_overlaps(svg: ParsedSVG) -> list[str]:
     return errors
 
 
+def check_edge_label_distance(
+    svg: ParsedSVG,
+    *,
+    min_distance: float = MIN_EDGE_LABEL_DISTANCE,
+) -> list[str]:
+    """Edge labels must have sufficient distance from their own edge path.
+
+    Graphviz (especially neato) often places labels centered on the edge
+    line, making them hard to read. This check measures the minimum
+    distance between each edge label bounding box and its parent edge
+    path, and flags any that are too close.
+    """
+    errors: list[str] = []
+
+    edge_path_map: dict[str, str] = {}
+    for edge_name, d in svg.edge_paths:
+        edge_path_map[edge_name] = d
+
+    for display_name, edge_id, label_bb in svg.edge_labels:
+        d = edge_path_map.get(edge_id)
+        if d is None:
+            continue
+        edge_line = svg_path_to_linestring(d)
+        label_poly = label_bb.to_shapely()
+        dist = edge_line.distance(label_poly)
+        if dist < min_distance:
+            errors.append(
+                f"Edge label {display_name} is {dist:.1f}px from its edge "
+                f"(minimum {min_distance:.0f}px)"
+            )
+
+    return errors
+
+
 def run_all_checks(svg: ParsedSVG) -> list[str]:
     errors: list[str] = []
     errors.extend(check_arrow_crosses_any_text(svg))
     errors.extend(check_text_crosses_border(svg))
     errors.extend(check_data_layer_position(svg))
     errors.extend(check_label_overlaps(svg))
+    errors.extend(check_edge_label_distance(svg))
     return errors
 
 
