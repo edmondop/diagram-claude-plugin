@@ -23,15 +23,25 @@ nodes + edges + auto-layout.
 
 ## Label & Layout Tips
 
-1. **Use `xlabel` instead of `label` for edge labels near vertical arrows.**
-   The default `label` places text at the edge midpoint, which sits directly
-   on vertical arrows. `xlabel` places it beside the arrow:
+1. **Use midpoint label nodes for edge labels that sit on the arrow path.**
+   Graphviz places edge `label` and `xlabel` text on or very close to the
+   edge path. For `neato`/`fdp`/`sfdp` this is unfixable with padding alone.
+   Instead, split the edge into two segments with an invisible node carrying
+   the label:
    ```python
-   dot.edge("a", "b", xlabel="  HTTP  ")   # beside the arrow
-   dot.edge("a", "b", label="  HTTP  ")    # ON the arrow (bad for vertical)
+   # BAD — label sits directly on the arrow
+   dot.edge("a", "b", label="HTTP")
+
+   # GOOD — midpoint node carries the label, offset from the path
+   dot.node("_lbl_0", label="HTTP", shape="none", style="",
+            fillcolor="none", fontsize="9", fontcolor="#555",
+            width="0", height="0")
+   dot.edge("a", "_lbl_0", arrowhead="none")
+   dot.edge("_lbl_0", "b")
    ```
-   Note: `xlabel` requires `forcelabels="true"` in graph attributes.
-   Pad with leading/trailing spaces to push the label further from the line.
+   For simple `dot` diagrams with horizontal edges, space-padded `label`
+   may suffice: `label="  HTTP  "`. Use midpoint nodes when the quality
+   validator reports labels too close to their edge path.
 
 2. **Always left-align cluster labels with `labeljust="l"`.** Graphviz
    centers cluster labels by default. In top-down (`rankdir="TB"`) layouts,

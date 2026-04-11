@@ -225,6 +225,7 @@ ERRORS (2):
 | Arrow crosses cluster/node label | Increase `ranksep`, `nodesep`, or add `minlen` on the offending edge. Move annotation nodes to a different rank. |
 | Node crosses cluster border | Add `margin="16"` or `margin="20"` to the cluster `c.attr()`. |
 | Arrow crosses destination node text | Increase node `margin` (e.g., `"0.3,0.2"`) so the text bounding box is well inside the node border. |
+| Edge label too close to edge | Use midpoint label nodes (see [Midpoint label nodes](#midpoint-label-nodes-edge-label-placement-fix)). |
 | Labels overlap | Shorten labels, increase `nodesep`, or use `rank="same"` constraints. |
 
 Re-generate the SVG and re-run validation after every fix. Do not
@@ -273,9 +274,55 @@ dot.edge("a", "b", label="  shared  \n  secret  ")
 **Exception for `neato`/`fdp`/`sfdp` engines:** Space padding only helps
 with the `dot` engine (vertical/horizontal edges). For force-directed
 layouts (`neato`, `fdp`, `sfdp`), edges are at arbitrary angles so
-horizontal padding doesn't move text away from the line. Use `xlabel`
-instead of `label` and set `forcelabels="true"` at graph level — this
-tells graphviz to place labels *beside* edges with collision avoidance.
+horizontal padding doesn't move text away from the line. Use the
+midpoint label node technique instead (see below).
+
+### Midpoint label nodes (edge label placement fix)
+
+Graphviz places edge `label` and `xlabel` text directly on or very close
+to the edge path — especially with `neato`/`fdp`/`sfdp`, but also with
+`dot` on vertical edges. This makes labels hard to read.
+
+**Fix:** Replace edge labels with invisible midpoint nodes. Split each
+labeled edge into two segments with a `shape="none"` node in between
+that carries the label text. The layout engine positions these nodes with
+natural spacing, keeping text readable.
+
+```python
+# BAD — label sits on the edge path
+dot.edge("a", "b", label="shared secret")
+
+# GOOD — midpoint node carries the label, offset from the path
+dot.node("_lbl_0", label="shared secret", shape="none", style="",
+         fillcolor="none", fontsize="9", fontcolor="#555",
+         width="0", height="0")
+dot.edge("a", "_lbl_0", arrowhead="none")
+dot.edge("_lbl_0", "b")
+```
+
+For multiple labeled edges, use a loop:
+
+```python
+edges = [
+    ("src1", "dst1", "label one", "#555"),
+    ("src2", "dst2", "label two", "#555"),
+]
+for i, (src, dst, lbl, fc) in enumerate(edges):
+    mid = f"_lbl_{i}"
+    dot.node(mid, label=lbl, shape="none", style="", fillcolor="none",
+             fontsize="9", fontcolor=fc, width="0", height="0")
+    dot.edge(src, mid, arrowhead="none")
+    dot.edge(mid, dst)
+```
+
+**Trade-off:** This makes diagrams slightly larger because each labeled
+edge becomes two edges with an intermediate node. Use it when:
+- Edge labels fail the `check_edge_label_distance` quality test
+- The diagram uses `neato`/`fdp`/`sfdp` (where xlabel doesn't help)
+- Labels on vertical `dot` edges remain unreadable despite space padding
+
+For simple `dot` diagrams where space-padded labels pass validation,
+plain `label="  text  "` is still preferred (simpler source).
 
 ## Style Defaults
 
@@ -394,6 +441,10 @@ function — keep adjusting the Graphviz source until all checks pass.
   or add `minlen` to create clearance
 - Labels overlap → increase `nodesep`, use `constraint="false"` on
   cross-connections, or remove redundant labels
+- Edge label too close to edge path → use midpoint label nodes (split
+  edge into two segments with invisible `shape="none"` node carrying
+  the label text). Required for `neato`/`fdp`/`sfdp`; recommended for
+  `dot` when space padding alone doesn't pass validation
 
 ## Additional References
 
