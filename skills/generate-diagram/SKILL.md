@@ -247,10 +247,19 @@ Unless the user specifies otherwise:
 
 - **Font**: Helvetica, Arial, sans-serif
 - **Stroke**: #333-#555, 1.2-2px
-- **Fills**: muted material-design tones (not neon, not pastel candy)
-- **Text**: black/#333 for labels, #666 for annotations
+- **Fills**: material-design 300/400 weight tones (soft, easy on the eyes).
+  **Avoid 700-900 weight fills** (`#C62828`, `#1a5ad7`, `#2E7D32`, `#6A1B9A`)
+  — they are too saturated for large node/cluster fills and strain the reader's
+  eyes. Use lighter variants instead:
+  - Red: `#E57373` (300) instead of `#C62828` (800)
+  - Blue: `#5C6BC0` (400) or `#90CAF9` (200) instead of `#1a5ad7`
+  - Green: `#66BB6A` (400) or `#81C784` (300) instead of `#2E7D32`
+  - Purple: `#BA68C8` (300) instead of `#6A1B9A`
+  - Reserve 700+ weights only for small accents (thin borders, edge colors)
+- **Text**: `#333` for labels on light fills, white for labels on 400+ weight
+  fills. `#555` for annotations
 - **No gradients, no decorative elements**
-- **PlantUML theme**: transparent background, `#1a5ad7` borders, `#0b2147` text
+- **PlantUML theme**: transparent background, `#5C6BC0` borders, `#0b2147` text
 
 ### Cluster Labels and Borders (Graphviz)
 
