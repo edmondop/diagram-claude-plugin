@@ -89,6 +89,44 @@ def bbox_from_path_d(d: str) -> BBox | None:
     return BBox(min(xs), min(ys), max(xs), max(ys))
 
 
+def ellipse_bbox(elem: ET.Element) -> BBox | None:
+    cx = elem.get("cx")
+    cy = elem.get("cy")
+    rx = elem.get("rx")
+    ry = elem.get("ry")
+    if any(v is None for v in (cx, cy, rx, ry)):
+        return None
+    cx_f, cy_f = float(cx), float(cy)
+    rx_f, ry_f = float(rx), float(ry)
+    return BBox(cx_f - rx_f, cy_f - ry_f, cx_f + rx_f, cy_f + ry_f)
+
+
+def polygon_bbox(elem: ET.Element) -> BBox | None:
+    points = elem.get("points", "")
+    coords = re.findall(r"(-?\d+\.?\d*),(-?\d+\.?\d*)", points)
+    if not coords:
+        return None
+    xs = [float(c[0]) for c in coords]
+    ys = [float(c[1]) for c in coords]
+    return BBox(min(xs), min(ys), max(xs), max(ys))
+
+
+def node_shape_bbox(g: ET.Element) -> BBox | None:
+    for tag, extractor in [("ellipse", ellipse_bbox), ("polygon", polygon_bbox)]:
+        el = g.find(tag)
+        if el is not None:
+            bb = extractor(el)
+            if bb:
+                return bb
+    path_el = g.find("path")
+    if path_el is not None:
+        d = path_el.get("d", "")
+        bb = bbox_from_path_d(d)
+        if bb:
+            return bb
+    return None
+
+
 def text_bbox(elem: ET.Element) -> BBox | None:
     x_str = elem.get("x")
     y_str = elem.get("y")
@@ -124,6 +162,7 @@ class ParsedSVG:
     cluster_labels: dict[str, tuple[str, BBox]]
     cluster_border_paths: dict[str, str]  # cluster name → raw d attribute
     node_labels: list[tuple[str, BBox]]
+    node_shapes: list[tuple[str, BBox]]  # (node_name, shape bounding box)
     edge_labels: list[tuple[str, str, BBox]]  # (display_name, edge_id, bbox)
     edge_paths: list[tuple[str, str]]  # (edge_id, raw d attribute)
 
@@ -162,6 +201,7 @@ def parse_svg(svg_path: Path) -> ParsedSVG:
                 cluster_labels[name] = (text_el.text or "", tb)
 
     node_labels: list[tuple[str, BBox]] = []
+    node_shapes: list[tuple[str, BBox]] = []
     for g in graph_g.findall(".//g[@class='node']"):
         title = g.find("title")
         node_name = title.text if title is not None and title.text else "?"
@@ -170,6 +210,9 @@ def parse_svg(svg_path: Path) -> ParsedSVG:
             tb = text_bbox(text_el)
             if tb:
                 node_labels.append((node_name, tb))
+        shape_bb = node_shape_bbox(g)
+        if shape_bb:
+            node_shapes.append((node_name, shape_bb))
 
     edge_labels: list[tuple[str, str, BBox]] = []
     edge_paths: list[tuple[str, str]] = []
@@ -193,6 +236,7 @@ def parse_svg(svg_path: Path) -> ParsedSVG:
         cluster_labels,
         cluster_border_paths,
         node_labels,
+        node_shapes,
         edge_labels,
         edge_paths,
     )
@@ -331,6 +375,16 @@ def check_edge_label_distance(
     return errors
 
 
+def check_node_shape_overlaps(svg: ParsedSVG) -> list[str]:
+    """No two node shapes may overlap each other."""
+    errors: list[str] = []
+    for i, (name_a, bb_a) in enumerate(svg.node_shapes):
+        for name_b, bb_b in svg.node_shapes[i + 1 :]:
+            if bb_a.overlaps(bb_b):
+                errors.append(f"Node shapes overlap: '{name_a}' vs '{name_b}'")
+    return errors
+
+
 def run_all_checks(svg: ParsedSVG) -> list[str]:
     errors: list[str] = []
     errors.extend(check_arrow_crosses_any_text(svg))
@@ -338,6 +392,7 @@ def run_all_checks(svg: ParsedSVG) -> list[str]:
     errors.extend(check_data_layer_position(svg))
     errors.extend(check_label_overlaps(svg))
     errors.extend(check_edge_label_distance(svg))
+    errors.extend(check_node_shape_overlaps(svg))
     return errors
 
 
@@ -370,6 +425,10 @@ class TestOutputDiagram:
 
     def test_no_label_overlaps(self, svg: ParsedSVG) -> None:
         errors = check_label_overlaps(svg)
+        assert not errors, "\n".join(errors)
+
+    def test_no_node_shape_overlaps(self, svg: ParsedSVG) -> None:
+        errors = check_node_shape_overlaps(svg)
         assert not errors, "\n".join(errors)
 
 
