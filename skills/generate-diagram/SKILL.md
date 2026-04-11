@@ -70,7 +70,12 @@ inline scripts. For editable hand-drawn diagrams, use **Excalidraw** JSON.
      the SVG.
    - Excalidraw: write a `.excalidraw` JSON file. Open it.
 
-6. **Iterate** on user feedback.
+6. **MANDATORY: Run quality validation** on every Graphviz-generated SVG
+   before showing the result to the user. See
+   [Quality Validation](#quality-validation) below. Do NOT skip this step.
+   Do NOT present a diagram as finished until it passes validation.
+
+7. **Iterate** on user feedback.
 
 ## Routing Table
 
@@ -172,6 +177,69 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 ```
+
+## Quality Validation
+
+**This is a hard requirement, not a suggestion.** Every Graphviz-generated
+SVG must pass `test_svg_quality.py` before the diagram is considered done.
+Graphviz auto-layout frequently produces overlapping text, arrows crossing
+labels, and nodes bleeding outside cluster borders — problems that are
+invisible when you only look at the DOT source but immediately visible in
+the rendered SVG.
+
+### What the validator checks
+
+| Check | What it detects |
+|-------|----------------|
+| Arrow crosses text | An edge path (Bezier curve) intersects a cluster label, edge label, or node label that does not belong to that edge |
+| Text crosses border | A text label overlaps a cluster border path |
+| Label overlaps | Two text labels occupy the same bounding box |
+| Layout centering | Clusters that should be centered are not drifting off-axis |
+
+### How to run
+
+```bash
+# Validate a single SVG (CLI mode — no pytest needed at runtime)
+uv run @references/examples/test_svg_quality.py output/my-diagram.svg
+```
+
+Output on success:
+```
+Parsed: 3 clusters, 12 nodes, 5 edge labels
+✓ All checks passed!
+```
+
+Output on failure:
+```
+Parsed: 3 clusters, 12 nodes, 5 edge labels
+
+ERRORS (2):
+  ✘ Arrow apply->target_token crosses node 'target_token'
+  ✘ node 'enc_secrets' crosses cluster_repo border
+```
+
+### When validation fails — how to fix
+
+| Error | Common fix |
+|-------|-----------|
+| Arrow crosses cluster/node label | Increase `ranksep`, `nodesep`, or add `minlen` on the offending edge. Move annotation nodes to a different rank. |
+| Node crosses cluster border | Add `margin="16"` or `margin="20"` to the cluster `c.attr()`. |
+| Arrow crosses destination node text | Increase node `margin` (e.g., `"0.3,0.2"`) so the text bounding box is well inside the node border. |
+| Labels overlap | Shorten labels, increase `nodesep`, or use `rank="same"` constraints. |
+
+Re-generate the SVG and re-run validation after every fix. Do not
+guess — the validator uses proper Bezier curve sampling and Shapely
+geometric intersection, which is more accurate than visual inspection.
+
+### Scope
+
+The validator parses Graphviz SVG structure (it looks for a `graph0`
+group element). It does **not** apply to:
+- svgwrite / drawsvg diagrams (no `graph0` group)
+- PlantUML diagrams
+- Excalidraw files
+
+For non-Graphviz diagrams, visual inspection is the only verification.
 
 ## Style Defaults
 
