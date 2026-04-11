@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Known-bad fixture: two node shapes intentionally overlap -->
-<svg width="300pt" height="200pt" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 196)">
+<svg width="260" height="120" viewBox="0 0 260 120" xmlns="http://www.w3.org/2000/svg">
+<rect width="260" height="120" fill="#f8f9fa"/>
+<g id="graph0" class="graph">
 <title>G</title>
-<!-- Node A: box from (20,100) to (120,150) -->
+<!-- Node A: box from (10,20) to (130,80) -->
 <g id="node1" class="node">
 <title>A</title>
-<polygon fill="#e3f2fd" stroke="#333" points="20,100 120,100 120,150 20,150 20,100"/>
-<text text-anchor="middle" x="70" y="130" font-family="Helvetica" font-size="12">Node A</text>
+<polygon fill="#e3f2fd" stroke="#333" stroke-width="1.5" points="10,20 130,20 130,80 10,80 10,20"/>
+<text text-anchor="middle" x="70" y="55" font-family="Helvetica" font-size="14">Node A</text>
 </g>
-<!-- Node B: box from (80,110) to (180,160) — overlaps Node A -->
+<!-- Node B: box from (90,40) to (250,100) — overlaps Node A -->
 <g id="node2" class="node">
 <title>B</title>
-<polygon fill="#e8f5e9" stroke="#333" points="80,110 180,110 180,160 80,160 80,110"/>
-<text text-anchor="middle" x="130" y="140" font-family="Helvetica" font-size="12">Node B</text>
+<polygon fill="#e8f5e9" stroke="#333" stroke-width="1.5" points="90,40 250,40 250,100 90,100 90,40"/>
+<text text-anchor="middle" x="170" y="75" font-family="Helvetica" font-size="14">Node B</text>
 </g>
 <!-- Dummy edge so it parses as a valid graph -->
 <g id="edge1" class="edge">
 <title>A&#45;&gt;B</title>
-<path fill="none" stroke="#333" d="M120,125C130,125 140,130 150,135"/>
+<path fill="none" stroke="#333" d="M130,50C140,50 150,55 160,60"/>
 </g>
 </g>
 </svg>
