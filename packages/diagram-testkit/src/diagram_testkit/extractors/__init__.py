@@ -4,9 +4,11 @@ from pathlib import Path
 from ..model import DiagramElements, Format
 from .base import DiagramExtractor
 from .graphviz import GraphvizExtractor
+from .matplotlib import MatplotlibExtractor
 
 EXTRACTORS: dict[Format, DiagramExtractor] = {
     Format.GRAPHVIZ: GraphvizExtractor(),
+    Format.MATPLOTLIB: MatplotlibExtractor(),
 }
 
 

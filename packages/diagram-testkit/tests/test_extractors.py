@@ -71,3 +71,36 @@ class TestGraphvizExtractor:
         assert svgs
         elems = extract(svgs[0], format=Format.GRAPHVIZ)
         assert elems.texts
+
+
+class TestMatplotlibExtractor:
+
+    def test_extracts_text_labels(self):
+        svgs = sorted(FIXTURES_DIR.glob("matplotlib-*.svg"))
+        assert svgs
+        elems = extract(svgs[0])
+        assert elems.texts, "Should have at least one TextLabel"
+
+    def test_extracts_arrow_paths(self):
+        svgs = sorted(FIXTURES_DIR.glob("matplotlib-arrow-crosses-text.svg"))
+        assert svgs
+        elems = extract(svgs[0])
+        assert elems.arrows, "Should have at least one ArrowPath"
+
+    def test_extracts_shapes(self):
+        svgs = sorted(FIXTURES_DIR.glob("matplotlib-text-overlaps-shape.svg"))
+        assert svgs
+        elems = extract(svgs[0])
+        assert elems.shapes, "Should have at least one Shape"
+
+    def test_extracts_axes_container(self):
+        svgs = sorted(FIXTURES_DIR.glob("matplotlib-*.svg"))
+        assert svgs
+        elems = extract(svgs[0])
+        assert elems.containers, "Should have axes Container"
+
+    def test_source_path_is_set(self):
+        svgs = sorted(FIXTURES_DIR.glob("matplotlib-*.svg"))
+        assert svgs
+        elems = extract(svgs[0])
+        assert elems.source_path == svgs[0]
