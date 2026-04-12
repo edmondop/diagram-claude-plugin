@@ -1,6 +1,5 @@
 """Geometry primitives for SVG quality checks."""
 
-import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
@@ -9,6 +8,8 @@ from shapely.geometry import box as shapely_box
 from svgpathtools import parse_path
 
 PATH_SAMPLES = 200
+DEFAULT_FONT_SIZE = 10.0
+CHAR_WIDTH_RATIO = 0.6
 
 
 @dataclass
@@ -53,18 +54,12 @@ def path_to_linestring(
 
 
 def bbox_from_path_d(d: str) -> BBox | None:
-    coords = re.findall(r"(-?\d+\.?\d*),(-?\d+\.?\d*)", d)
-    if not coords:
-        nums = re.findall(r"(-?\d+\.?\d*)", d)
-        nums = [float(n) for n in nums]
-        if len(nums) < 2:
-            return None
-        xs = nums[0::2]
-        ys = nums[1::2]
-        return BBox(min(xs), min(ys), max(xs), max(ys))
-    xs = [float(c[0]) for c in coords]
-    ys = [float(c[1]) for c in coords]
-    return BBox(min(xs), min(ys), max(xs), max(ys))
+    try:
+        path = parse_path(d)
+        x_min, x_max, y_min, y_max = path.bbox()
+        return BBox(x_min, y_min, x_max, y_max)
+    except Exception:
+        return None
 
 
 def text_bbox(elem: ET.Element) -> BBox | None:
@@ -74,12 +69,8 @@ def text_bbox(elem: ET.Element) -> BBox | None:
         return None
     x, y = float(x_str), float(y_str)
     text = elem.text or ""
-    font_size = 10.0
-    fs_attr = elem.get("font-size", "10")
-    fs_match = re.match(r"(\d+\.?\d*)", fs_attr)
-    if fs_match:
-        font_size = float(fs_match.group(1))
-    char_w = font_size * 0.6
+    font_size = float(elem.get("font-size", str(DEFAULT_FONT_SIZE)))
+    char_w = font_size * CHAR_WIDTH_RATIO
     text_w = len(text) * char_w
     anchor = elem.get("text-anchor", "start")
     if anchor == "middle":
