@@ -258,10 +258,88 @@ def _mpl_rect_bboxes(
     return rects
 
 
+def _mpl_arrow_paths(
+    axes_g: ET.Element,
+) -> list[tuple[str, str]]:
+    arrows: list[tuple[str, str]] = []
+    for g in axes_g:
+        g_id = g.get("id", "")
+        if not g_id.startswith("patch_"):
+            continue
+        paths = g.findall("path")
+        if not paths:
+            continue
+        first_style = paths[0].get("style", "")
+        if "fill: none" not in first_style:
+            continue
+        d = paths[0].get("d", "")
+        if d:
+            arrows.append((g_id, d))
+    return arrows
+
+
 def _strip_svg_namespaces(root: ET.Element) -> None:
     for elem in root.iter():
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
+
+
+def _mpl_parse_axes(svg: ParsedSVG) -> ET.Element | None:
+    if svg.source_path is None:
+        return None
+    tree = ET.parse(svg.source_path)
+    root = tree.getroot()
+    _strip_svg_namespaces(root)
+    # Multi-axes: search all axes_N groups
+    for axes_g in root.iter():
+        if axes_g.get("id", "").startswith("axes_"):
+            return axes_g
+    return None
+
+
+def check_matplotlib_arrow_crosses_text(
+    svg: ParsedSVG,
+    *,
+    padding: float = ARROW_TEXT_PADDING,
+) -> list[str]:
+    axes_g = _mpl_parse_axes(svg)
+    if axes_g is None:
+        return []
+    arrows = _mpl_arrow_paths(axes_g)
+    if not arrows:
+        return []
+    texts = _mpl_text_bboxes(axes_g)
+
+    errors: list[str] = []
+    for arrow_id, d in arrows:
+        arrow_line = path_to_linestring(d)
+        for text_id, text_bb in texts:
+            text_poly = text_bb.to_shapely().buffer(padding)
+            if arrow_line.intersects(text_poly):
+                errors.append(
+                    f"Arrow {arrow_id} crosses {text_id}"
+                )
+    return errors
+
+
+def check_matplotlib_text_overlaps_text(
+    svg: ParsedSVG,
+) -> list[str]:
+    axes_g = _mpl_parse_axes(svg)
+    if axes_g is None:
+        return []
+    texts = _mpl_text_bboxes(axes_g)
+    if len(texts) < 2:
+        return []
+
+    errors: list[str] = []
+    for i, (name_a, bb_a) in enumerate(texts):
+        for name_b, bb_b in texts[i + 1:]:
+            if bb_a.overlaps(bb_b):
+                errors.append(
+                    f"Text overlap: {name_a} vs {name_b}"
+                )
+    return errors
 
 
 def check_matplotlib_text_overlaps_shape(
@@ -269,13 +347,7 @@ def check_matplotlib_text_overlaps_shape(
     *,
     stroke_width: float = BORDER_STROKE_WIDTH,
 ) -> list[str]:
-    if svg.source_path is None:
-        return []
-    tree = ET.parse(svg.source_path)
-    root = tree.getroot()
-    _strip_svg_namespaces(root)
-
-    axes_g = root.find(".//*[@id='axes_1']")
+    axes_g = _mpl_parse_axes(svg)
     if axes_g is None:
         return []
 
@@ -305,4 +377,6 @@ def run_all_checks(svg: ParsedSVG) -> list[str]:
     errors.extend(check_edge_label_distance(svg))
     errors.extend(check_matplotlib_annotation_overflow(svg))
     errors.extend(check_matplotlib_text_overlaps_shape(svg))
+    errors.extend(check_matplotlib_arrow_crosses_text(svg))
+    errors.extend(check_matplotlib_text_overlaps_text(svg))
     return errors
