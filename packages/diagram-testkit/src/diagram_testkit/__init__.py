@@ -1,32 +1,40 @@
-"""diagram-testkit — SVG quality linter for generated diagrams."""
+"""diagram-testkit - SVG quality linter for generated diagrams."""
 
 from .checks import (
+    check_annotation_overflow,
     check_arrow_crosses_text,
-    check_cluster_alignment,
-    check_edge_label_distance,
-    check_label_overlaps,
-    check_matplotlib_annotation_overflow,
-    check_matplotlib_arrow_crosses_text,
-    check_matplotlib_text_overlaps_shape,
-    check_matplotlib_text_overlaps_text,
-    check_text_crosses_border,
+    check_container_alignment,
+    check_text_crosses_shape,
+    check_text_overlaps_shape,
+    check_text_overlaps_text,
     run_all_checks,
 )
+from .extractors import detect_format, extract
 from .geometry import BBox
-from .parser import ParsedSVG, parse_svg
+from .model import (
+    ArrowPath,
+    Container,
+    DiagramElements,
+    Format,
+    Shape,
+    TextLabel,
+)
 
 __all__ = [
+    "ArrowPath",
     "BBox",
-    "ParsedSVG",
+    "Container",
+    "DiagramElements",
+    "Format",
+    "Shape",
+    "TextLabel",
+    "check_annotation_overflow",
     "check_arrow_crosses_text",
-    "check_cluster_alignment",
-    "check_edge_label_distance",
-    "check_label_overlaps",
-    "check_matplotlib_annotation_overflow",
-    "check_matplotlib_arrow_crosses_text",
-    "check_matplotlib_text_overlaps_shape",
-    "check_matplotlib_text_overlaps_text",
-    "check_text_crosses_border",
-    "parse_svg",
+    "check_container_alignment",
+    "check_text_crosses_shape",
+    "check_text_overlaps_shape",
+    "check_text_overlaps_text",
+    "detect_format",
+    "extract",
     "run_all_checks",
 ]
