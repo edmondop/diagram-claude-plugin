@@ -104,3 +104,16 @@ class TestMatplotlibExtractor:
         assert svgs
         elems = extract(svgs[0])
         assert elems.source_path == svgs[0]
+
+
+class TestExcalidrawExtractor:
+
+    def test_unknown_svg_returns_empty_elements(self, tmp_path):
+        svg = tmp_path / "plain.svg"
+        svg.write_text('<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>')
+        elems = extract(svg)
+        assert not elems.texts
+        assert not elems.arrows
+        assert not elems.shapes
+        assert not elems.containers
+        assert elems.source_path == svg

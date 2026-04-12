@@ -3,12 +3,14 @@ from pathlib import Path
 
 from ..model import DiagramElements, Format
 from .base import DiagramExtractor
+from .excalidraw import ExcalidrawExtractor
 from .graphviz import GraphvizExtractor
 from .matplotlib import MatplotlibExtractor
 
 EXTRACTORS: dict[Format, DiagramExtractor] = {
     Format.GRAPHVIZ: GraphvizExtractor(),
     Format.MATPLOTLIB: MatplotlibExtractor(),
+    Format.EXCALIDRAW: ExcalidrawExtractor(),
 }
 
 
@@ -23,6 +25,8 @@ def detect_format(svg_path: Path) -> Format | None:
         return Format.GRAPHVIZ
     if root.find(".//*[@id='axes_1']") is not None:
         return Format.MATPLOTLIB
+    if root.find(".//*[@data-id]") is not None:
+        return Format.EXCALIDRAW
     return None
 
 
