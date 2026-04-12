@@ -75,5 +75,6 @@ def main() -> None:
     fmt = Format(args.format) if args.format else None
     cluster_align = _parse_cluster_align(args.cluster_align) if args.cluster_align else None
 
-    failed = any(_lint_file(p, fmt=fmt, cluster_align=cluster_align) for p in args.files)
+    results = [_lint_file(p, fmt=fmt, cluster_align=cluster_align) for p in args.files]
+    failed = any(results)
     sys.exit(1 if failed else 0)

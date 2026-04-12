@@ -98,6 +98,21 @@ class TestMatplotlibExtractor:
         elems = extract(svgs[0])
         assert elems.containers, "Should have axes Container"
 
+    def test_axis_off_skips_colored_patch_2_as_container(self, tmp_path):
+        svg = tmp_path / "axis-off.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g id="axes_1">'
+            '<g id="patch_2"><path d="M 10 10 L 50 10 L 50 50 L 10 50 z" '
+            'style="fill: #e57373; opacity: 0.85; stroke: #333"/></g>'
+            '</g></svg>'
+        )
+        elems = extract(svg, format=Format.MATPLOTLIB)
+        assert not elems.containers, (
+            "Colored patch_2 (user content, not axes background) "
+            "should not be treated as a container"
+        )
+
     def test_source_path_is_set(self):
         svgs = sorted(FIXTURES_DIR.glob("matplotlib-*.svg"))
         assert svgs

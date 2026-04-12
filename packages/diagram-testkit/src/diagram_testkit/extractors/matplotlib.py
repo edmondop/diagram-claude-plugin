@@ -130,6 +130,9 @@ class MatplotlibExtractor:
         bg_path = patch_2.find("path")
         if bg_path is None:
             return
+        style = bg_path.get("style", "")
+        if "#ffffff" not in style and "fill: none" not in style:
+            return
         bb = bbox_from_path_d(bg_path.get("d", ""))
         if bb:
             containers.append(Container(id="axes_1", bbox=bb))
