@@ -1,11 +1,10 @@
-from diagram_testkit.model import (
-    ArrowPath,
-    Container,
-    DiagramElements,
-    Format,
-    Shape,
-    TextLabel,
-)
+from diagram_testkit.geometry import BBox
+from diagram_testkit.model import ArrowPath
+from diagram_testkit.model import Container
+from diagram_testkit.model import DiagramElements
+from diagram_testkit.model import Format
+from diagram_testkit.model import Shape
+from diagram_testkit.model import TextLabel
 
 
 def test_format_enum_has_three_members():
@@ -24,8 +23,6 @@ def test_diagram_elements_defaults_to_empty_lists():
 
 
 def test_text_label_owner_defaults_to_none():
-    from diagram_testkit.geometry import BBox
-
     label = TextLabel(id="t1", bbox=BBox(0, 0, 10, 10))
     assert label.owner is None
 
@@ -36,14 +33,10 @@ def test_arrow_path_owner_defaults_to_none():
 
 
 def test_shape_has_bbox_and_path():
-    from diagram_testkit.geometry import BBox
-
     shape = Shape(id="s1", bbox=BBox(0, 0, 50, 50), path_d="M0,0 L50,0 L50,50 Z")
     assert shape.bbox.width == 50
 
 
 def test_container_has_bbox():
-    from diagram_testkit.geometry import BBox
-
     container = Container(id="c1", bbox=BBox(10, 20, 100, 200))
     assert container.bbox.cx == 55.0

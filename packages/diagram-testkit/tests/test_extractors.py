@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from diagram_testkit.extractors import detect_format, extract
+from diagram_testkit.extractors import detect_format
+from diagram_testkit.extractors import extract
 from diagram_testkit.model import Format
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"

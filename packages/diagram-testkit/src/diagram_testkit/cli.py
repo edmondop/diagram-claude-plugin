@@ -4,9 +4,47 @@ import argparse
 import sys
 from pathlib import Path
 
-from diagram_testkit.checks import check_container_alignment, run_all_checks
+from diagram_testkit.checks import check_container_alignment
+from diagram_testkit.checks import run_all_checks
 from diagram_testkit.extractors import extract
 from diagram_testkit.model import Format
+
+
+def _parse_cluster_align(raw: str) -> tuple[str, str]:
+    parts = dict(p.split("=") for p in raw.split(","))
+    src, dst = parts.get("src"), parts.get("dst")
+    if not src or not dst:
+        print("Error: --cluster-align requires src=X,dst=Y")  # noqa: T201
+        sys.exit(1)
+    return src, dst
+
+
+def _lint_file(
+    svg_path: Path,
+    *,
+    fmt: Format | None,
+    cluster_align: tuple[str, str] | None,
+) -> bool:
+    if not svg_path.exists():
+        print(f"File not found: {svg_path}")  # noqa: T201
+        return True
+
+    elems = extract(svg_path, format=fmt)
+    errors = run_all_checks(elems)
+
+    if cluster_align:
+        errors.extend(
+            check_container_alignment(elems, src=cluster_align[0], dst=cluster_align[1])
+        )
+
+    if errors:
+        print(f"FAIL: {svg_path}")  # noqa: T201
+        for e in errors:
+            print(f"  {e}")  # noqa: T201
+        return True
+
+    print(f"OK: {svg_path}")  # noqa: T201
+    return False
 
 
 def main() -> None:
@@ -31,44 +69,11 @@ def main() -> None:
 
     args = parser.parse_args()
     if args.command != "lint":
-        parser.print_help()
+        parser.print_help()  # noqa: T201
         sys.exit(1)
 
     fmt = Format(args.format) if args.format else None
+    cluster_align = _parse_cluster_align(args.cluster_align) if args.cluster_align else None
 
-    cluster_src = None
-    cluster_dst = None
-    if args.cluster_align:
-        parts = dict(p.split("=") for p in args.cluster_align.split(","))
-        cluster_src = parts.get("src")
-        cluster_dst = parts.get("dst")
-        if not cluster_src or not cluster_dst:
-            print("Error: --cluster-align requires src=X,dst=Y")
-            sys.exit(1)
-
-    failed = False
-    for svg_path in args.files:
-        if not svg_path.exists():
-            print(f"File not found: {svg_path}")
-            failed = True
-            continue
-
-        elems = extract(svg_path, format=fmt)
-        errors = run_all_checks(elems)
-
-        if cluster_src and cluster_dst:
-            errors.extend(
-                check_container_alignment(
-                    elems, src=cluster_src, dst=cluster_dst
-                )
-            )
-
-        if errors:
-            print(f"FAIL: {svg_path}")
-            for e in errors:
-                print(f"  {e}")
-            failed = True
-        else:
-            print(f"OK: {svg_path}")
-
+    failed = any(_lint_file(p, fmt=fmt, cluster_align=cluster_align) for p in args.files)
     sys.exit(1 if failed else 0)

@@ -1,0 +1,81 @@
+line-length = 100
+target-version = "py310"
+
+[lint]
+preview = true
+explicit-preview-rules = true
+select = [
+    "F",       # pyflakes
+    "N",       # pep8-naming
+    "E",       # pycodestyle errors
+    "W",       # pycodestyle warnings
+    "A",       # flake8-builtins shadowing
+    "PLC",     # pylint convention
+    "PLC2701", # import-private-name (preview)
+    "I001",    # isort
+    "UP",      # pyupgrade
+
+    # structural / complexity
+    "C901",    # McCabe complexity
+    "PLR",     # pylint refactor
+    "PLW",     # pylint warnings
+    "B",       # flake8-bugbear
+
+    # style / hygiene
+    "TID",     # flake8-tidy-imports (bans relative imports)
+    "ERA",     # commented-out code
+    "T201",    # print()
+    "T203",    # pprint()
+    "PERF",    # perflint
+    "PTH",     # use pathlib not os.path
+    "RET",     # flake8-return
+    "ARG",     # unused arguments
+    "SIM",     # flake8-simplify
+    "C4",      # flake8-comprehensions
+    "ICN",     # import conventions
+    "PIE",     # misc lints
+    "RSE",     # raise lints
+    "SLF",     # private member access
+    "TCH",     # type-checking imports
+]
+
+ignore = [
+    "E501",    # line-too-long -- formatter handles this
+    "PLR2004", # magic-value-comparison -- too noisy in tests
+    "TCH001",  # typing-only-first-party-import
+    "TCH002",  # typing-only-third-party-import
+    "TCH003",  # typing-only-standard-library-import
+    "RET504",  # unnecessary-assign -- sometimes aids readability
+    "SIM108",  # if-else-block-instead-of-if-exp
+]
+
+[lint.mccabe]
+max-complexity = 5
+
+[lint.pylint]
+max-args = 6
+max-returns = 4
+max-branches = 8
+max-statements = 35
+max-positional-args = 4
+max-locals = 10
+max-public-methods = 6
+
+[lint.flake8-builtins]
+builtins-ignorelist = ["id", "format"]
+builtins-strict-checking = false
+
+[lint.isort]
+force-single-line = true
+order-by-type = true
+known-first-party = ["diagram_testkit"]
+
+[lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[format]
+quote-style = "double"
+
+[lint.per-file-ignores]
+"tests/*" = ["ARG", "SLF001"]
+"src/diagram_testkit/cli.py" = ["T201"]

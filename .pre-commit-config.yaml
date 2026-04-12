@@ -1,0 +1,10 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.7
+    hooks:
+      - id: ruff
+        args: [--fix, --config, packages/diagram-testkit/ruff.toml]
+        files: ^packages/diagram-testkit/
+      - id: ruff-format
+        args: [--config, packages/diagram-testkit/ruff.toml]
+        files: ^packages/diagram-testkit/

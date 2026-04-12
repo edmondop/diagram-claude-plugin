@@ -5,7 +5,8 @@ from diagram_testkit.extractors.base import DiagramExtractor
 from diagram_testkit.extractors.excalidraw import ExcalidrawExtractor
 from diagram_testkit.extractors.graphviz import GraphvizExtractor
 from diagram_testkit.extractors.matplotlib import MatplotlibExtractor
-from diagram_testkit.model import DiagramElements, Format
+from diagram_testkit.model import DiagramElements
+from diagram_testkit.model import Format
 
 EXTRACTORS: dict[Format, DiagramExtractor] = {
     Format.GRAPHVIZ: GraphvizExtractor(),
@@ -13,20 +14,26 @@ EXTRACTORS: dict[Format, DiagramExtractor] = {
     Format.EXCALIDRAW: ExcalidrawExtractor(),
 }
 
+_FORMAT_MARKERS: list[tuple[str, Format]] = [
+    (".//*[@id='graph0']", Format.GRAPHVIZ),
+    (".//*[@id='axes_1']", Format.MATPLOTLIB),
+    (".//*[@data-id]", Format.EXCALIDRAW),
+]
 
-def detect_format(svg_path: Path) -> Format | None:
-    tree = ET.parse(svg_path)
-    root = tree.getroot()
+
+def _strip_namespaces(root: ET.Element) -> None:
     for elem in root.iter():
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
-    if root.find(".//*[@id='graph0']") is not None:
-        return Format.GRAPHVIZ
-    if root.find(".//*[@id='axes_1']") is not None:
-        return Format.MATPLOTLIB
-    if root.find(".//*[@data-id]") is not None:
-        return Format.EXCALIDRAW
+
+def detect_format(svg_path: Path) -> Format | None:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    _strip_namespaces(root)
+    for xpath, fmt in _FORMAT_MARKERS:
+        if root.find(xpath) is not None:
+            return fmt
     return None
 
 

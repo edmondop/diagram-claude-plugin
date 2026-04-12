@@ -10,6 +10,7 @@ def _run_cli(*args: str) -> subprocess.CompletedProcess:
         [sys.executable, "-m", "diagram_testkit", *args],
         capture_output=True,
         text=True,
+        check=False,
     )
 
 
