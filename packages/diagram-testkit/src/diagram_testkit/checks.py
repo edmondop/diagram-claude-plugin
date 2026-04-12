@@ -11,6 +11,9 @@ BORDER_STROKE_WIDTH = 2.0
 MAX_CENTER_OFFSET_RATIO = 0.7
 MIN_EDGE_LABEL_DISTANCE = 8.0
 GLYPH_ADVANCE_ESTIMATE = 65.0
+# DejaVu Sans Bold metrics in post-scale(0.015625) space
+_MPL_GLYPH_CAP_HEIGHT = 72.9  # 4666 font-units * 0.015625
+_MPL_GLYPH_DESCENT = 1.42  # 91 font-units * 0.015625
 
 
 def _collect_all_text(
@@ -198,6 +201,102 @@ def check_matplotlib_annotation_overflow(svg: ParsedSVG) -> list[str]:
     return errors
 
 
+def _mpl_text_bboxes(
+    axes_g: ET.Element,
+) -> list[tuple[str, BBox]]:
+    texts: list[tuple[str, BBox]] = []
+    for g in axes_g:
+        g_id = g.get("id", "")
+        if not g_id.startswith("text_"):
+            continue
+        for idx, inner_g in enumerate(g.findall("g")):
+            transform = inner_g.get("transform", "")
+            t_match = re.search(
+                r"translate\(([\d.e+-]+)[\s,]+([\d.e+-]+)\)", transform
+            )
+            s_match = re.search(
+                r"scale\(([\d.e+-]+)[\s,]+([\d.e+-]+)\)", transform
+            )
+            if not t_match or not s_match:
+                continue
+            tx = float(t_match.group(1))
+            ty = float(t_match.group(2))
+            sx = abs(float(s_match.group(1)))
+            sy = abs(float(s_match.group(2)))
+            max_use_x = 0.0
+            for use_el in inner_g.findall("use"):
+                ut = use_el.get("transform", "")
+                ut_match = re.search(r"translate\(([\d.e+-]+)", ut)
+                if ut_match:
+                    max_use_x = max(max_use_x, float(ut_match.group(1)))
+            x_min = tx
+            x_max = tx + (max_use_x + GLYPH_ADVANCE_ESTIMATE) * sx
+            y_min = ty - _MPL_GLYPH_CAP_HEIGHT * sy
+            y_max = ty + _MPL_GLYPH_DESCENT * sy
+            label = f"{g_id}" if idx == 0 else f"{g_id}[{idx}]"
+            texts.append((label, BBox(x_min, y_min, x_max, y_max)))
+    return texts
+
+
+def _mpl_rect_bboxes(
+    axes_g: ET.Element,
+) -> list[tuple[str, BBox]]:
+    rects: list[tuple[str, BBox]] = []
+    for g in axes_g:
+        g_id = g.get("id", "")
+        if not g_id.startswith("patch_"):
+            continue
+        path_el = g.find("path")
+        if path_el is None:
+            continue
+        style = path_el.get("style", "")
+        if "#ffffff" in style or "fill: none" in style:
+            continue
+        bb = bbox_from_path_d(path_el.get("d", ""))
+        if bb is not None:
+            rects.append((g_id, bb))
+    return rects
+
+
+def _strip_svg_namespaces(root: ET.Element) -> None:
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+
+def check_matplotlib_text_overlaps_shape(
+    svg: ParsedSVG,
+    *,
+    stroke_width: float = BORDER_STROKE_WIDTH,
+) -> list[str]:
+    if svg.source_path is None:
+        return []
+    tree = ET.parse(svg.source_path)
+    root = tree.getroot()
+    _strip_svg_namespaces(root)
+
+    axes_g = root.find(".//*[@id='axes_1']")
+    if axes_g is None:
+        return []
+
+    rects = _mpl_rect_bboxes(axes_g)
+    if not rects:
+        return []
+    texts = _mpl_text_bboxes(axes_g)
+
+    errors: list[str] = []
+    for text_id, text_bb in texts:
+        text_poly = text_bb.to_shapely()
+        for rect_id, rect_bb in rects:
+            rect_poly = rect_bb.to_shapely()
+            rect_border = rect_poly.boundary.buffer(stroke_width / 2)
+            if text_poly.intersects(rect_border):
+                errors.append(
+                    f"Text {text_id} overlaps {rect_id} border"
+                )
+    return errors
+
+
 def run_all_checks(svg: ParsedSVG) -> list[str]:
     errors: list[str] = []
     errors.extend(check_arrow_crosses_text(svg))
@@ -205,4 +304,5 @@ def run_all_checks(svg: ParsedSVG) -> list[str]:
     errors.extend(check_label_overlaps(svg))
     errors.extend(check_edge_label_distance(svg))
     errors.extend(check_matplotlib_annotation_overflow(svg))
+    errors.extend(check_matplotlib_text_overlaps_shape(svg))
     return errors
