@@ -1,7 +1,7 @@
 """Format-agnostic SVG quality checks operating on DiagramElements."""
 
-from .geometry import path_to_linestring
-from .model import DiagramElements
+from diagram_testkit.geometry import path_to_linestring
+from diagram_testkit.model import DiagramElements
 
 ARROW_TEXT_PADDING = 2.0
 BORDER_STROKE_WIDTH = 2.0

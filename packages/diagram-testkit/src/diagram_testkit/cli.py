@@ -4,9 +4,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from .checks import check_container_alignment, run_all_checks
-from .extractors import extract
-from .model import Format
+from diagram_testkit.checks import check_container_alignment, run_all_checks
+from diagram_testkit.extractors import extract
+from diagram_testkit.model import Format
 
 
 def main() -> None:

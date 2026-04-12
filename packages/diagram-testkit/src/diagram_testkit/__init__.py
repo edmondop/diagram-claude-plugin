@@ -1,6 +1,6 @@
 """diagram-testkit - SVG quality linter for generated diagrams."""
 
-from .checks import (
+from diagram_testkit.checks import (
     check_annotation_overflow,
     check_arrow_crosses_text,
     check_container_alignment,
@@ -9,9 +9,9 @@ from .checks import (
     check_text_overlaps_text,
     run_all_checks,
 )
-from .extractors import detect_format, extract
-from .geometry import BBox
-from .model import (
+from diagram_testkit.extractors import detect_format, extract
+from diagram_testkit.geometry import BBox
+from diagram_testkit.model import (
     ArrowPath,
     Container,
     DiagramElements,

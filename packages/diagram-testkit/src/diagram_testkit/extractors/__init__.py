@@ -1,11 +1,11 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from ..model import DiagramElements, Format
-from .base import DiagramExtractor
-from .excalidraw import ExcalidrawExtractor
-from .graphviz import GraphvizExtractor
-from .matplotlib import MatplotlibExtractor
+from diagram_testkit.extractors.base import DiagramExtractor
+from diagram_testkit.extractors.excalidraw import ExcalidrawExtractor
+from diagram_testkit.extractors.graphviz import GraphvizExtractor
+from diagram_testkit.extractors.matplotlib import MatplotlibExtractor
+from diagram_testkit.model import DiagramElements, Format
 
 EXTRACTORS: dict[Format, DiagramExtractor] = {
     Format.GRAPHVIZ: GraphvizExtractor(),

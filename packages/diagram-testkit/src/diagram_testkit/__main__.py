@@ -1,5 +1,5 @@
 """Allow running as `python -m diagram_testkit`."""
 
-from .cli import main
+from diagram_testkit.cli import main
 
 main()

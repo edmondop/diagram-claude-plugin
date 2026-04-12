@@ -1,8 +1,8 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from ..geometry import bbox_from_path_d, text_bbox
-from ..model import ArrowPath, Container, DiagramElements, Shape, TextLabel
+from diagram_testkit.geometry import bbox_from_path_d, text_bbox
+from diagram_testkit.model import ArrowPath, Container, DiagramElements, Shape, TextLabel
 
 
 def _strip_namespaces(root: ET.Element) -> None:

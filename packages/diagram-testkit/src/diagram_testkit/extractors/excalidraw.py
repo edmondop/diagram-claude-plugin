@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ..model import DiagramElements
+from diagram_testkit.model import DiagramElements
 
 
 class ExcalidrawExtractor:

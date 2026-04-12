@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
-from .geometry import BBox
+from diagram_testkit.geometry import BBox
 
 
 class Format(Enum):

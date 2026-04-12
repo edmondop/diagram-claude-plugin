@@ -2,8 +2,8 @@ import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from ..geometry import BBox, bbox_from_path_d
-from ..model import ArrowPath, Container, DiagramElements, Shape, TextLabel
+from diagram_testkit.geometry import BBox, bbox_from_path_d
+from diagram_testkit.model import ArrowPath, Container, DiagramElements, Shape, TextLabel
 
 GLYPH_ADVANCE_ESTIMATE = 65.0
 _MPL_GLYPH_CAP_HEIGHT = 72.9
