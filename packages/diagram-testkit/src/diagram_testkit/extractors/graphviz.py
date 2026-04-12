@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from ..geometry import BBox, bbox_from_path_d, text_bbox
+from ..geometry import bbox_from_path_d, text_bbox
 from ..model import ArrowPath, Container, DiagramElements, Shape, TextLabel
 
 

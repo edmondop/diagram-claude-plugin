@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from diagram_testkit.model import (
     ArrowPath,
     Container,

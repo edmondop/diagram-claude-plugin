@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pytest
-
 from diagram_testkit.extractors import detect_format, extract
 from diagram_testkit.model import Format
 

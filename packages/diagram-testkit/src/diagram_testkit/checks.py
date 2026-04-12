@@ -1,6 +1,6 @@
 """Format-agnostic SVG quality checks operating on DiagramElements."""
 
-from .geometry import BBox, path_to_linestring
+from .geometry import path_to_linestring
 from .model import DiagramElements
 
 ARROW_TEXT_PADDING = 2.0
