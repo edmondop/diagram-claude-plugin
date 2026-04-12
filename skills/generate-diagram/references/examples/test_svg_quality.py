@@ -81,9 +81,16 @@ def svg_path_to_linestring(d: str, num_samples: int = PATH_SAMPLES) -> LineStrin
 
 
 def bbox_from_path_d(d: str) -> BBox | None:
+    # Try comma-separated first (Graphviz), then space-separated (matplotlib)
     coords = re.findall(r"(-?\d+\.?\d*),(-?\d+\.?\d*)", d)
     if not coords:
-        return None
+        nums = re.findall(r"(-?\d+\.?\d*)", d)
+        nums = [float(n) for n in nums]
+        if len(nums) < 2:
+            return None
+        xs = nums[0::2]
+        ys = nums[1::2]
+        return BBox(min(xs), min(ys), max(xs), max(ys))
     xs = [float(c[0]) for c in coords]
     ys = [float(c[1]) for c in coords]
     return BBox(min(xs), min(ys), max(xs), max(ys))
@@ -126,6 +133,7 @@ class ParsedSVG:
     node_labels: list[tuple[str, BBox]]
     edge_labels: list[tuple[str, str, BBox]]  # (display_name, edge_id, bbox)
     edge_paths: list[tuple[str, str]]  # (edge_id, raw d attribute)
+    source_path: Path | None = None
 
 
 def parse_svg(svg_path: Path) -> ParsedSVG:
@@ -137,7 +145,8 @@ def parse_svg(svg_path: Path) -> ParsedSVG:
             elem.tag = elem.tag.split("}", 1)[1]
 
     graph_g = root.find(".//g[@id='graph0']")
-    assert graph_g is not None, f"No graph0 group in {svg_path}"
+    if graph_g is None:
+        return ParsedSVG({}, {}, {}, [], [], [], source_path=svg_path)
 
     clusters: dict[str, BBox] = {}
     cluster_labels: dict[str, tuple[str, BBox]] = {}
@@ -195,6 +204,7 @@ def parse_svg(svg_path: Path) -> ParsedSVG:
         node_labels,
         edge_labels,
         edge_paths,
+        source_path=svg_path,
     )
 
 
@@ -331,6 +341,82 @@ def check_edge_label_distance(
     return errors
 
 
+GLYPH_ADVANCE_ESTIMATE = 65.0  # conservative DejaVuSans glyph width in font units
+
+
+def check_matplotlib_annotation_overflow(svg: ParsedSVG) -> list[str]:
+    """Text annotations in matplotlib charts must not extend beyond the axes area.
+
+    Matplotlib renders text as <g> groups with translate/scale transforms and
+    <use> references to glyph definitions.  Annotations placed via ax.text()
+    at data coordinates can extend past the axes boundary when the value is
+    near the axis limit.
+    """
+    if svg.source_path is None:
+        return []
+
+    tree = ET.parse(svg.source_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    axes_g = root.find(".//*[@id='axes_1']")
+    if axes_g is None:
+        return []
+
+    patch_2 = axes_g.find("*[@id='patch_2']")
+    if patch_2 is None:
+        return []
+    bg_path = patch_2.find("path")
+    if bg_path is None:
+        return []
+    axes_bb = bbox_from_path_d(bg_path.get("d", ""))
+    if axes_bb is None:
+        return []
+
+    errors: list[str] = []
+    for g in axes_g:
+        g_id = g.get("id", "")
+        if not g_id.startswith("text_"):
+            continue
+
+        inner_g = g.find("g")
+        if inner_g is None:
+            continue
+
+        transform = inner_g.get("transform", "")
+        t_match = re.search(r"translate\(([\d.e+-]+)[\s,]+([\d.e+-]+)\)", transform)
+        s_match = re.search(r"scale\(([\d.e+-]+)[\s,]+([\d.e+-]+)\)", transform)
+        if not t_match or not s_match:
+            continue
+
+        tx = float(t_match.group(1))
+        ty = float(t_match.group(2))
+        sx = abs(float(s_match.group(1)))
+
+        if ty < axes_bb.y_min or ty > axes_bb.y_max:
+            continue
+
+        max_use_x = 0.0
+        for use_el in inner_g.findall("use"):
+            use_transform = use_el.get("transform", "")
+            ut_match = re.search(r"translate\(([\d.e+-]+)", use_transform)
+            if ut_match:
+                max_use_x = max(max_use_x, float(ut_match.group(1)))
+
+        text_right = tx + (max_use_x + GLYPH_ADVANCE_ESTIMATE) * sx
+        if text_right > axes_bb.x_max:
+            overflow = text_right - axes_bb.x_max
+            errors.append(
+                f"Annotation {g_id} overflows axes area by {overflow:.1f}px "
+                f"on the right (text ends at x={text_right:.0f}, "
+                f"axes right edge at x={axes_bb.x_max:.0f})"
+            )
+
+    return errors
+
+
 def run_all_checks(svg: ParsedSVG) -> list[str]:
     errors: list[str] = []
     errors.extend(check_arrow_crosses_any_text(svg))
@@ -338,6 +424,7 @@ def run_all_checks(svg: ParsedSVG) -> list[str]:
     errors.extend(check_data_layer_position(svg))
     errors.extend(check_label_overlaps(svg))
     errors.extend(check_edge_label_distance(svg))
+    errors.extend(check_matplotlib_annotation_overflow(svg))
     return errors
 
 
