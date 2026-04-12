@@ -40,6 +40,15 @@ jobs:
           node-version: "22"
       - run: node scripts/validate-plugin.js ./
 
+  test-diagram-testkit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - name: Run diagram-testkit tests
+        working-directory: packages/diagram-testkit
+        run: uv run --extra test pytest tests/ -v
+
   smoke-test:
     runs-on: ubuntu-latest
     steps:
