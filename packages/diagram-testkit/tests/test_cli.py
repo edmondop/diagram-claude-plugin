@@ -1,5 +1,3 @@
-"""CLI smoke tests."""
-
 import subprocess
 import sys
 from pathlib import Path
@@ -21,6 +19,21 @@ def test_cli_lint_bad_fixture_exits_1():
     result = _run_cli("lint", str(bad_svgs[0]))
     assert result.returncode == 1
     assert "FAIL" in result.stdout
+
+
+def test_cli_lint_matplotlib_fixture_exits_1():
+    mpl_svgs = list(FIXTURES_DIR.glob("matplotlib-*.svg"))
+    assert mpl_svgs
+    result = _run_cli("lint", str(mpl_svgs[0]))
+    assert result.returncode == 1
+    assert "FAIL" in result.stdout
+
+
+def test_cli_lint_format_override():
+    svgs = list(FIXTURES_DIR.glob("architecture-*.svg"))
+    assert svgs
+    result = _run_cli("lint", "--format", "graphviz", str(svgs[0]))
+    assert result.returncode in (0, 1)
 
 
 def test_cli_lint_nonexistent_file_exits_1():

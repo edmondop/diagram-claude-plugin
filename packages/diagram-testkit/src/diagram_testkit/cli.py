@@ -4,8 +4,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from .checks import check_cluster_alignment, run_all_checks
-from .parser import parse_svg
+from .checks import check_container_alignment, run_all_checks
+from .extractors import extract
+from .model import Format
 
 
 def main() -> None:
@@ -18,15 +19,22 @@ def main() -> None:
     lint_parser = sub.add_parser("lint", help="Check SVG files")
     lint_parser.add_argument("files", nargs="+", type=Path)
     lint_parser.add_argument(
+        "--format",
+        choices=[f.value for f in Format],
+        help="Override format auto-detection",
+    )
+    lint_parser.add_argument(
         "--cluster-align",
         metavar="src=X,dst=Y",
-        help="Check that cluster dst is centered below cluster src",
+        help="Check that container dst is centered below container src",
     )
 
     args = parser.parse_args()
     if args.command != "lint":
         parser.print_help()
         sys.exit(1)
+
+    fmt = Format(args.format) if args.format else None
 
     cluster_src = None
     cluster_dst = None
@@ -45,13 +53,13 @@ def main() -> None:
             failed = True
             continue
 
-        svg = parse_svg(svg_path)
-        errors = run_all_checks(svg)
+        elems = extract(svg_path, format=fmt)
+        errors = run_all_checks(elems)
 
         if cluster_src and cluster_dst:
             errors.extend(
-                check_cluster_alignment(
-                    svg, src=cluster_src, dst=cluster_dst
+                check_container_alignment(
+                    elems, src=cluster_src, dst=cluster_dst
                 )
             )
 
