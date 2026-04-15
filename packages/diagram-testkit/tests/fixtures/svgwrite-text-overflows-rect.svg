@@ -1,0 +1,31 @@
+<svg baseProfile="full" height="300px" version="1.1" width="600px" xmlns="http://www.w3.org/2000/svg">
+  <rect fill="white" height="300" width="600" x="0" y="0" />
+
+  <!-- Title at y=28, will collide with tall marker labels below -->
+  <text fill="#333" font-family="Helvetica" font-size="16px" font-weight="bold" text-anchor="middle" x="300" y="28">Project Timeline Overview</text>
+
+  <!-- Timeline axis -->
+  <line stroke="#333" stroke-width="2" x1="50" x2="550" y1="70" y2="70" />
+
+  <!-- Marker with 4 lines of text — top line at y=22 overlaps title at y=28 -->
+  <line stroke="#333" stroke-width="2" x1="300" x2="300" y1="64" y2="76" />
+  <text fill="#333" font-family="Helvetica" font-size="11px" font-weight="bold" text-anchor="middle" x="300" y="22">Phase 2</text>
+  <text fill="#333" font-family="Helvetica" font-size="9px" text-anchor="middle" x="300" y="34">Week 8</text>
+  <text fill="#333" font-family="Helvetica" font-size="9px" text-anchor="middle" x="300" y="46">Integration</text>
+  <text fill="#333" font-family="Helvetica" font-size="9px" text-anchor="middle" x="300" y="58">Testing</text>
+
+  <!-- Box 1: text fits — no error expected -->
+  <rect fill="#E3F2FD" height="36" rx="4" ry="4" stroke="#5C6BC0" stroke-width="1.5" width="200" x="50" y="90" />
+  <text fill="#333" font-family="Helvetica" font-size="11px" font-weight="bold" text-anchor="middle" x="150" y="105">Planning</text>
+  <text fill="#666" font-family="Helvetica" font-size="9px" text-anchor="middle" x="150" y="118">Short label OK</text>
+
+  <!-- Box 2: label overflows rect — ERROR expected -->
+  <rect fill="#E8F5E9" height="36" rx="4" ry="4" stroke="#66BB6A" stroke-width="1.5" width="120" x="280" y="140" />
+  <text fill="#333" font-family="Helvetica" font-size="11px" font-weight="bold" text-anchor="middle" x="340" y="155">Requirements Gathering and Analysis</text>
+  <text fill="#666" font-family="Helvetica" font-size="9px" text-anchor="middle" x="340" y="168">Stakeholder interviews and document review sessions completed</text>
+
+  <!-- Box 3: description overflows rect — ERROR expected -->
+  <rect fill="#FFF3E0" height="36" rx="4" ry="4" stroke="#FFA726" stroke-width="1.5" width="140" x="430" y="190" />
+  <text fill="#333" font-family="Helvetica" font-size="11px" font-weight="bold" text-anchor="middle" x="500" y="205">Deploy</text>
+  <text fill="#666" font-family="Helvetica" font-size="9px" text-anchor="middle" x="500" y="218">Production deployment with rollback verification and monitoring setup</text>
+</svg>

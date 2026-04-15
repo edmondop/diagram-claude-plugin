@@ -418,7 +418,7 @@ uv run --with svgpathtools --with shapely --with pytest -- \
    cluster border line
 3. **No label overlaps** — no two text elements may overlap each other
 
-**Anti-pattern fixtures** in `references/examples/test_fixtures/` show
+**Anti-pattern fixtures** in `packages/diagram-testkit/tests/fixtures/` show
 common layout problems that the tests catch:
 
 | Fixture | Anti-pattern |

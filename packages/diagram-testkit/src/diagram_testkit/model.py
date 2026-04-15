@@ -10,6 +10,7 @@ class Format(Enum):
     GRAPHVIZ = "graphviz"
     MATPLOTLIB = "matplotlib"
     EXCALIDRAW = "excalidraw"
+    SVGWRITE = "svgwrite"
 
 
 @dataclass
