@@ -30,7 +30,6 @@ def _strip_namespaces(root: ET.Element) -> None:
 
 
 def _is_svgwrite(root: ET.Element) -> bool:
-    """Detect svgwrite SVGs: flat structure with top-level <text> and <rect>."""
     has_text = root.find(".//text") is not None
     has_rect = root.find(".//rect") is not None
     return has_text and has_rect

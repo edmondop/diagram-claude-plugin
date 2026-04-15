@@ -1,10 +1,3 @@
-"""Extractor for svgwrite-generated SVGs (flat structure, no graphviz groups).
-
-svgwrite produces flat SVGs with top-level <text> and <rect> elements.
-This extractor pairs each <text> with the nearest enclosing <rect> to
-enable overflow checks.
-"""
-
 import xml.etree.ElementTree as ET
 from pathlib import Path
 

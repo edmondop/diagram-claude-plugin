@@ -125,15 +125,6 @@ def check_text_overflows_rect(
     *,
     margin: float = TEXT_OVERFLOW_MARGIN,
 ) -> list[str]:
-    """Check that text elements don't overflow their containing rect.
-
-    For each <text> element, find the nearest <rect> that contains its
-    center point. If the estimated text width exceeds the rect width
-    (minus margin), flag it as an overflow.
-
-    Works on raw SVG files (not DiagramElements) because rect containment
-    is a spatial relationship not captured by the format-agnostic model.
-    """
     tree = ET.parse(svg_path)
     root = tree.getroot()
     for elem in root.iter():
