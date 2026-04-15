@@ -6,7 +6,9 @@ from diagram_testkit.checks import check_container_alignment
 from diagram_testkit.checks import check_text_crosses_shape
 from diagram_testkit.checks import check_text_overlaps_shape
 from diagram_testkit.checks import check_text_overlaps_text
+from diagram_testkit.checks import check_text_overflows_rect
 from diagram_testkit.checks import run_all_checks
+from diagram_testkit.checks import run_all_checks_with_file
 from diagram_testkit.extractors import detect_format
 from diagram_testkit.extractors import extract
 from diagram_testkit.geometry import BBox
@@ -31,7 +33,9 @@ __all__ = [
     "check_text_crosses_shape",
     "check_text_overlaps_shape",
     "check_text_overlaps_text",
+    "check_text_overflows_rect",
     "detect_format",
     "extract",
     "run_all_checks",
+    "run_all_checks_with_file",
 ]

@@ -120,6 +120,35 @@ class TestMatplotlibExtractor:
         assert elems.source_path == svgs[0]
 
 
+class TestSvgwriteExtractor:
+
+    def test_detects_svgwrite_format(self):
+        svgs = sorted(FIXTURES_DIR.glob("svgwrite-*.svg"))
+        assert svgs, "No svgwrite fixture SVGs found"
+        assert detect_format(svgs[0]) == Format.SVGWRITE
+
+    def test_extracts_text_labels(self):
+        svgs = sorted(FIXTURES_DIR.glob("svgwrite-*.svg"))
+        assert svgs
+        elems = extract(svgs[0])
+        assert elems.texts, "Should have at least one TextLabel"
+
+    def test_source_path_is_set(self):
+        svgs = sorted(FIXTURES_DIR.glob("svgwrite-*.svg"))
+        assert svgs
+        elems = extract(svgs[0])
+        assert elems.source_path == svgs[0]
+
+    def test_extracts_correct_text_count(self):
+        svgs = sorted(FIXTURES_DIR.glob("svgwrite-text-overflows-rect.svg"))
+        assert svgs
+        elems = extract(svgs[0])
+        text_ids = [t.id for t in elems.texts]
+        assert len(text_ids) >= 8, (
+            f"Expected at least 8 text labels, got {len(text_ids)}"
+        )
+
+
 class TestExcalidrawExtractor:
 
     def test_unknown_svg_returns_empty_elements(self, tmp_path):

@@ -69,7 +69,8 @@ def text_bbox(elem: ET.Element) -> BBox | None:
         return None
     x, y = float(x_str), float(y_str)
     text = elem.text or ""
-    font_size = float(elem.get("font-size", str(DEFAULT_FONT_SIZE)))
+    fs_raw = elem.get("font-size", str(DEFAULT_FONT_SIZE))
+    font_size = float(fs_raw.replace("px", "").replace("pt", ""))
     char_w = font_size * CHAR_WIDTH_RATIO
     text_w = len(text) * char_w
     anchor = elem.get("text-anchor", "start")

@@ -1,11 +1,17 @@
 """Format-agnostic SVG quality checks operating on DiagramElements."""
 
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+from diagram_testkit.geometry import BBox
 from diagram_testkit.geometry import path_to_linestring
+from diagram_testkit.geometry import text_bbox
 from diagram_testkit.model import DiagramElements
 
 ARROW_TEXT_PADDING = 2.0
 BORDER_STROKE_WIDTH = 2.0
 MAX_CENTER_OFFSET_RATIO = 0.7
+TEXT_OVERFLOW_MARGIN = 4.0  # px tolerance for text-in-rect checks
 
 
 def check_arrow_crosses_text(
@@ -114,6 +120,76 @@ def check_container_alignment(
     return []
 
 
+def check_text_overflows_rect(
+    svg_path: Path,
+    *,
+    margin: float = TEXT_OVERFLOW_MARGIN,
+) -> list[str]:
+    """Check that text elements don't overflow their containing rect.
+
+    For each <text> element, find the nearest <rect> that contains its
+    center point. If the estimated text width exceeds the rect width
+    (minus margin), flag it as an overflow.
+
+    Works on raw SVG files (not DiagramElements) because rect containment
+    is a spatial relationship not captured by the format-agnostic model.
+    """
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    rects: list[BBox] = []
+    for rect_el in root.iter("rect"):
+        x = rect_el.get("x")
+        y = rect_el.get("y")
+        w = rect_el.get("width")
+        h = rect_el.get("height")
+        if any(v is None for v in (x, y, w, h)):
+            continue
+        rects.append(BBox(
+            float(x), float(y), float(x) + float(w), float(y) + float(h),
+        ))
+
+    errors: list[str] = []
+    for text_el in root.iter("text"):
+        content = text_el.text or ""
+        if not content.strip():
+            continue
+        tb = text_bbox(text_el)
+        if tb is None:
+            continue
+
+        text_cx = tb.cx
+        text_cy = (tb.y_min + tb.y_max) / 2
+
+        # Find the smallest containing rect (skip full-canvas backgrounds)
+        best_rect: BBox | None = None
+        best_area = float("inf")
+        for rect_bb in rects:
+            if (
+                rect_bb.x_min <= text_cx <= rect_bb.x_max
+                and rect_bb.y_min <= text_cy <= rect_bb.y_max
+            ):
+                area = rect_bb.width * (rect_bb.y_max - rect_bb.y_min)
+                if area < best_area:
+                    best_area = area
+                    best_rect = rect_bb
+
+        if best_rect is not None:
+            overflow = tb.width - (best_rect.width - margin)
+            if overflow > 0:
+                errors.append(
+                    f"Text '{content.strip()}' overflows its rect "
+                    f"by {overflow:.0f}px "
+                    f"(text width: {tb.width:.0f}px, "
+                    f"rect width: {best_rect.width:.0f}px)"
+                )
+
+    return errors
+
+
 def run_all_checks(elems: DiagramElements) -> list[str]:
     errors: list[str] = []
     errors.extend(check_arrow_crosses_text(elems))
@@ -121,4 +197,14 @@ def run_all_checks(elems: DiagramElements) -> list[str]:
     errors.extend(check_text_crosses_shape(elems))
     errors.extend(check_text_overlaps_shape(elems))
     errors.extend(check_annotation_overflow(elems))
+    return errors
+
+
+def run_all_checks_with_file(
+    elems: DiagramElements,
+    svg_path: Path | None = None,
+) -> list[str]:
+    errors = run_all_checks(elems)
+    if svg_path is not None:
+        errors.extend(check_text_overflows_rect(svg_path))
     return errors

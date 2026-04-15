@@ -11,6 +11,7 @@ import pytest
 from diagram_testkit.checks import check_arrow_crosses_text
 from diagram_testkit.checks import check_container_alignment
 from diagram_testkit.checks import check_text_overlaps_text
+from diagram_testkit.checks import check_text_overflows_rect
 from diagram_testkit.checks import run_all_checks
 from diagram_testkit.extractors import extract
 from diagram_testkit.geometry import BBox
@@ -112,3 +113,54 @@ class TestContainerAlignment:
             elems, src="nonexistent", dst="also_nonexistent"
         )
         assert not errors
+
+
+class TestTextOverflowsRect:
+
+    def test_text_fitting_inside_rect_passes(self, tmp_path):
+        svg = tmp_path / "ok.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect x="0" y="0" width="200" height="40" />'
+            '<text x="100" y="25" text-anchor="middle" '
+            'font-size="11px">Short</text>'
+            '</svg>'
+        )
+        errors = check_text_overflows_rect(svg)
+        assert not errors
+
+    def test_text_overflowing_rect_detected(self, tmp_path):
+        svg = tmp_path / "overflow.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect x="100" y="0" width="80" height="40" />'
+            '<text x="140" y="25" text-anchor="middle" '
+            'font-size="11px">This label is way too long for the box</text>'
+            '</svg>'
+        )
+        errors = check_text_overflows_rect(svg)
+        assert errors
+        assert "overflows" in errors[0]
+
+    def test_text_outside_rect_ignored(self, tmp_path):
+        svg = tmp_path / "outside.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect x="0" y="0" width="50" height="40" />'
+            '<text x="400" y="25" text-anchor="middle" '
+            'font-size="11px">This text is far away from the rect</text>'
+            '</svg>'
+        )
+        errors = check_text_overflows_rect(svg)
+        assert not errors
+
+    def test_fixture_detects_overflow(self):
+        fixture = FIXTURES_DIR / "svgwrite-text-overflows-rect.svg"
+        assert fixture.exists(), f"Fixture not found: {fixture}"
+        errors = check_text_overflows_rect(fixture)
+        assert errors, "Fixture should have at least one text overflow"
+        overflow_texts = [e for e in errors if "overflows" in e]
+        assert len(overflow_texts) >= 2, (
+            f"Expected at least 2 overflow errors, got {len(overflow_texts)}: "
+            + "\n".join(errors)
+        )
