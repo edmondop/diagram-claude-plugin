@@ -15,7 +15,7 @@ from pathlib import Path
 
 import graphviz
 
-FIXTURES_DIR = Path(__file__).parent / "test_fixtures"
+FIXTURES_DIR = Path(__file__).parents[4] / "packages" / "diagram-testkit" / "tests" / "fixtures"
 BLACK = "#222222"
 NODE_FILL = "#E3F2FD"
 

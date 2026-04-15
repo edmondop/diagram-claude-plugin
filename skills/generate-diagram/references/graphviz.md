@@ -145,4 +145,4 @@ uv run --with svgpathtools --with shapely --with pytest -- \
 
 The tests use proper Bezier curve sampling (not just control points)
 to detect arrows crossing text and text crossing cluster borders.
-See `references/examples/test_fixtures/` for anti-pattern examples.
+See `packages/diagram-testkit/tests/fixtures/` for anti-pattern examples.
