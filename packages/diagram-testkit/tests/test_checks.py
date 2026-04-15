@@ -11,8 +11,9 @@ import pytest
 from diagram_testkit.checks import check_arrow_crosses_text
 from diagram_testkit.checks import check_container_alignment
 from diagram_testkit.checks import check_text_overlaps_text
+from diagram_testkit.checks import check_line_crosses_text
 from diagram_testkit.checks import check_text_overflows_rect
-from diagram_testkit.checks import run_all_checks
+from diagram_testkit.checks import run_all_checks_with_file
 from diagram_testkit.extractors import extract
 from diagram_testkit.geometry import BBox
 from diagram_testkit.model import ArrowPath
@@ -34,7 +35,7 @@ class TestFixturesMustFail:
         self, fixture_elems: tuple[str, DiagramElements],
     ) -> None:
         name, elems = fixture_elems
-        errors = run_all_checks(elems)
+        errors = run_all_checks_with_file(elems, elems.source_path)
         assert errors, (
             f"Fixture {name} passed ALL checks - either the fixture "
             f"is not actually broken or the checks are too lenient"
@@ -163,4 +164,41 @@ class TestTextOverflowsRect:
         assert len(overflow_texts) >= 2, (
             f"Expected at least 2 overflow errors, got {len(overflow_texts)}: "
             + "\n".join(errors)
+        )
+
+
+class TestLineCrossesText:
+
+    def test_line_through_text_detected(self, tmp_path):
+        svg = tmp_path / "crossing.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text x="100" y="55" text-anchor="middle" '
+            'font-size="13px">Label</text>'
+            '<line x1="50" y1="50" x2="150" y2="50" stroke="#333" />'
+            '</svg>'
+        )
+        errors = check_line_crosses_text(svg)
+        assert errors
+        assert "Label" in errors[0]
+
+    def test_line_far_from_text_passes(self, tmp_path):
+        svg = tmp_path / "ok.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text x="100" y="50" text-anchor="middle" '
+            'font-size="13px">Label</text>'
+            '<line x1="50" y1="200" x2="150" y2="200" stroke="#333" />'
+            '</svg>'
+        )
+        errors = check_line_crosses_text(svg)
+        assert not errors
+
+    def test_fixture_detects_crossing(self):
+        fixture = FIXTURES_DIR / "svgwrite-line-crosses-text.svg"
+        assert fixture.exists()
+        errors = check_line_crosses_text(fixture)
+        assert len(errors) >= 3, (
+            f"Expected at least 3 line-crosses-text errors (Hub + 3 spokes), "
+            f"got {len(errors)}: " + "\n".join(errors)
         )

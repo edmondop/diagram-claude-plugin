@@ -3,6 +3,7 @@
 from diagram_testkit.checks import check_annotation_overflow
 from diagram_testkit.checks import check_arrow_crosses_text
 from diagram_testkit.checks import check_container_alignment
+from diagram_testkit.checks import check_line_crosses_text
 from diagram_testkit.checks import check_text_crosses_shape
 from diagram_testkit.checks import check_text_overlaps_shape
 from diagram_testkit.checks import check_text_overlaps_text
@@ -30,6 +31,7 @@ __all__ = [
     "check_annotation_overflow",
     "check_arrow_crosses_text",
     "check_container_alignment",
+    "check_line_crosses_text",
     "check_text_crosses_shape",
     "check_text_overlaps_shape",
     "check_text_overlaps_text",

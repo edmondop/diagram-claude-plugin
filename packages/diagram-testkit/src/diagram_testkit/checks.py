@@ -3,12 +3,15 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from shapely.geometry import LineString
+
 from diagram_testkit.geometry import BBox
 from diagram_testkit.geometry import path_to_linestring
 from diagram_testkit.geometry import text_bbox
 from diagram_testkit.model import DiagramElements
 
 ARROW_TEXT_PADDING = 2.0
+LINE_TEXT_PADDING = 2.0
 BORDER_STROKE_WIDTH = 2.0
 MAX_CENTER_OFFSET_RATIO = 0.7
 TEXT_OVERFLOW_MARGIN = 4.0  # px tolerance for text-in-rect checks
@@ -181,6 +184,46 @@ def check_text_overflows_rect(
     return errors
 
 
+def check_line_crosses_text(
+    svg_path: Path,
+    *,
+    padding: float = LINE_TEXT_PADDING,
+) -> list[str]:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    lines: list[LineString] = []
+    for line_el in root.iter("line"):
+        coords = (
+            line_el.get("x1"), line_el.get("y1"),
+            line_el.get("x2"), line_el.get("y2"),
+        )
+        if any(v is None for v in coords):
+            continue
+        x1, y1, x2, y2 = (float(v) for v in coords)
+        lines.append(LineString([(x1, y1), (x2, y2)]))
+
+    errors: list[str] = []
+    for text_el in root.iter("text"):
+        content = text_el.text or ""
+        if not content.strip():
+            continue
+        tb = text_bbox(text_el)
+        if tb is None:
+            continue
+        text_poly = tb.to_shapely().buffer(padding)
+        for line in lines:
+            if line.intersects(text_poly):
+                errors.append(
+                    f"Line crosses text '{content.strip()}'"
+                )
+                break
+    return errors
+
+
 def run_all_checks(elems: DiagramElements) -> list[str]:
     errors: list[str] = []
     errors.extend(check_arrow_crosses_text(elems))
@@ -198,4 +241,5 @@ def run_all_checks_with_file(
     errors = run_all_checks(elems)
     if svg_path is not None:
         errors.extend(check_text_overflows_rect(svg_path))
+        errors.extend(check_line_crosses_text(svg_path))
     return errors

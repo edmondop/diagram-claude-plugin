@@ -1,0 +1,24 @@
+<svg baseProfile="full" height="250px" version="1.1" width="400px" xmlns="http://www.w3.org/2000/svg">
+  <rect fill="white" height="250" width="400" x="0" y="0" />
+
+  <!-- Hub node -->
+  <circle cx="200" cy="120" fill="#E8F5E9" r="35" stroke="#66BB6A" stroke-width="2" />
+  <text fill="#333" font-family="Helvetica" font-size="13px" font-weight="bold" text-anchor="middle" x="200" y="125">Hub</text>
+
+  <!-- Spoke A (top-left) -->
+  <circle cx="80" cy="50" fill="#E3F2FD" r="30" stroke="#5C6BC0" stroke-width="2" />
+  <text fill="#333" font-family="Helvetica" font-size="13px" font-weight="bold" text-anchor="middle" x="80" y="55">Alpha</text>
+
+  <!-- Spoke B (top-right) -->
+  <circle cx="320" cy="50" fill="#E3F2FD" r="30" stroke="#5C6BC0" stroke-width="2" />
+  <text fill="#333" font-family="Helvetica" font-size="13px" font-weight="bold" text-anchor="middle" x="320" y="55">Beta</text>
+
+  <!-- Spoke C (bottom) -->
+  <circle cx="200" cy="220" fill="#E3F2FD" r="30" stroke="#5C6BC0" stroke-width="2" />
+  <text fill="#333" font-family="Helvetica" font-size="13px" font-weight="bold" text-anchor="middle" x="200" y="225">Gamma</text>
+
+  <!-- Lines from center to center — these cross through the node labels -->
+  <line stroke="#66BB6A" stroke-width="2" x1="80" y1="50" x2="200" y2="120" />
+  <line stroke="#66BB6A" stroke-width="2" x1="320" y1="50" x2="200" y2="120" />
+  <line stroke="#66BB6A" stroke-width="2" x1="200" y1="220" x2="200" y2="120" />
+</svg>
