@@ -84,6 +84,16 @@ class TestTextOverlapsText:
         errors = check_text_overlaps_text(elems)
         assert not errors
 
+    def test_fixture_chart_labels_overlap(self):
+        fixture = FIXTURES_DIR / "svgwrite-chart-labels-overlap.svg"
+        assert fixture.exists()
+        elems = extract(fixture)
+        errors = check_text_overlaps_text(elems)
+        assert len(errors) >= 2, (
+            f"Expected at least 2 overlapping label pairs (VaR labels + z-values), "
+            f"got {len(errors)}: " + "\n".join(errors)
+        )
+
 
 class TestContainerAlignment:
 

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400px" height="200px">
+<rect x="0" y="0" width="400" height="200" fill="white"/>
+<!-- Axis line -->
+<line x1="40" y1="160" x2="360" y2="160" stroke="#333" stroke-width="1.5"/>
+<!-- Two dashed vertical reference lines placed close together -->
+<line x1="280" y1="30" x2="280" y2="160" stroke="#5C6BC0" stroke-width="1.5" stroke-dasharray="5,3"/>
+<line x1="306" y1="30" x2="306" y2="160" stroke="#7E57C2" stroke-width="1.5" stroke-dasharray="5,3"/>
+<!-- Labels that overlap: 26px apart but text is ~42px wide -->
+<text x="284" y="40" font-family="Helvetica" font-size="10px" font-weight="bold" fill="#5C6BC0">99% VaR</text>
+<text x="310" y="40" font-family="Helvetica" font-size="10px" font-weight="bold" fill="#7E57C2">99.7% VaR</text>
+<!-- Sub-labels that also overlap -->
+<text x="284" y="52" font-family="Helvetica" font-size="9px" fill="#666">z = 2.326</text>
+<text x="310" y="52" font-family="Helvetica" font-size="9px" fill="#666">z = 2.748</text>
+<!-- Axis label (no overlap, for completeness) -->
+<text x="200" y="180" text-anchor="middle" font-family="Helvetica" font-size="10px" fill="#666">Loss (standard deviations)</text>
+</svg>

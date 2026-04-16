@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from diagram_testkit.checks import check_container_alignment
-from diagram_testkit.checks import run_all_checks
+from diagram_testkit.checks import run_all_checks_with_file
 from diagram_testkit.extractors import extract
 from diagram_testkit.model import Format
 
@@ -30,7 +30,7 @@ def _lint_file(
         return True
 
     elems = extract(svg_path, format=fmt)
-    errors = run_all_checks(elems)
+    errors = run_all_checks_with_file(elems, svg_path)
 
     if cluster_align:
         errors.extend(
