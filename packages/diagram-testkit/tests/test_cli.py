@@ -46,3 +46,21 @@ def test_cli_lint_nonexistent_file_exits_1():
 def test_cli_no_command_exits_1():
     result = _run_cli()
     assert result.returncode == 1
+
+
+def test_cli_lint_chart_labels_overlap():
+    fixture = FIXTURES_DIR / "svgwrite-chart-labels-overlap.svg"
+    assert fixture.exists()
+    result = _run_cli("lint", str(fixture))
+    assert result.returncode == 1
+    assert "Text overlap" in result.stdout
+    assert "Threshold" in result.stdout
+
+
+def test_cli_lint_runs_file_based_checks():
+    """Verify CLI runs file-based checks (text_overflows_rect, line_crosses_text)."""
+    fixture = FIXTURES_DIR / "svgwrite-text-overflows-rect.svg"
+    assert fixture.exists()
+    result = _run_cli("lint", str(fixture))
+    assert result.returncode == 1
+    assert "overflows" in result.stdout

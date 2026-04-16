@@ -224,6 +224,53 @@ def check_line_crosses_text(
     return errors
 
 
+def check_text_outside_viewport(
+    svg_path: Path,
+    *,
+    margin: float = 0.0,
+) -> list[str]:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    # Parse viewport dimensions from the root <svg> element
+    w_str = root.get("width")
+    h_str = root.get("height")
+    if w_str is None or h_str is None:
+        return []
+    vp_w = float(w_str.replace("px", "").replace("pt", ""))
+    vp_h = float(h_str.replace("px", "").replace("pt", ""))
+
+    errors: list[str] = []
+    for text_el in root.iter("text"):
+        content = text_el.text or ""
+        if not content.strip():
+            continue
+        tb = text_bbox(text_el)
+        if tb is None:
+            continue
+
+        clipped_sides: list[str] = []
+        if tb.x_min < margin:
+            clipped_sides.append(f"left by {margin - tb.x_min:.0f}px")
+        if tb.x_max > vp_w - margin:
+            clipped_sides.append(f"right by {tb.x_max - (vp_w - margin):.0f}px")
+        if tb.y_min < margin:
+            clipped_sides.append(f"top by {margin - tb.y_min:.0f}px")
+        if tb.y_max > vp_h - margin:
+            clipped_sides.append(f"bottom by {tb.y_max - (vp_h - margin):.0f}px")
+
+        if clipped_sides:
+            errors.append(
+                f"Text '{content.strip()}' extends outside viewport "
+                f"({', '.join(clipped_sides)})"
+            )
+
+    return errors
+
+
 def run_all_checks(elems: DiagramElements) -> list[str]:
     errors: list[str] = []
     errors.extend(check_arrow_crosses_text(elems))
@@ -242,4 +289,5 @@ def run_all_checks_with_file(
     if svg_path is not None:
         errors.extend(check_text_overflows_rect(svg_path))
         errors.extend(check_line_crosses_text(svg_path))
+        errors.extend(check_text_outside_viewport(svg_path))
     return errors
