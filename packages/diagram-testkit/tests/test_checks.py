@@ -91,7 +91,7 @@ class TestTextOverlapsText:
         elems = extract(fixture)
         errors = check_text_overlaps_text(elems)
         assert len(errors) >= 2, (
-            f"Expected at least 2 overlapping label pairs (VaR labels + z-values), "
+            f"Expected at least 2 overlapping label pairs (threshold labels + sub-labels), "
             f"got {len(errors)}: " + "\n".join(errors)
         )
 

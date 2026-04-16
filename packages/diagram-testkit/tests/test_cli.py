@@ -54,7 +54,7 @@ def test_cli_lint_chart_labels_overlap():
     result = _run_cli("lint", str(fixture))
     assert result.returncode == 1
     assert "Text overlap" in result.stdout
-    assert "99% VaR" in result.stdout
+    assert "Threshold" in result.stdout
 
 
 def test_cli_lint_runs_file_based_checks():
