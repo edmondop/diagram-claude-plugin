@@ -10,8 +10,9 @@ import pytest
 
 from diagram_testkit.checks import check_arrow_crosses_text
 from diagram_testkit.checks import check_container_alignment
-from diagram_testkit.checks import check_text_overlaps_text
 from diagram_testkit.checks import check_line_crosses_text
+from diagram_testkit.checks import check_text_outside_viewport
+from diagram_testkit.checks import check_text_overlaps_text
 from diagram_testkit.checks import check_text_overflows_rect
 from diagram_testkit.checks import run_all_checks_with_file
 from diagram_testkit.extractors import extract
@@ -210,5 +211,52 @@ class TestLineCrossesText:
         errors = check_line_crosses_text(fixture)
         assert len(errors) >= 3, (
             f"Expected at least 3 line-crosses-text errors (Hub + 3 spokes), "
+            f"got {len(errors)}: " + "\n".join(errors)
+        )
+
+
+class TestTextOutsideViewport:
+
+    def test_text_inside_viewport_passes(self, tmp_path):
+        svg = tmp_path / "ok.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400px" height="200px">'
+            '<text x="200" y="100" text-anchor="middle" '
+            'font-size="10px">Centered</text>'
+            '</svg>'
+        )
+        errors = check_text_outside_viewport(svg)
+        assert not errors
+
+    def test_text_clipped_right_detected(self, tmp_path):
+        svg = tmp_path / "clip-right.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="200px" height="100px">'
+            '<text x="180" y="50" font-size="10px">'
+            'This text runs way past the right edge</text>'
+            '</svg>'
+        )
+        errors = check_text_outside_viewport(svg)
+        assert errors
+        assert "right" in errors[0]
+
+    def test_text_clipped_left_detected(self, tmp_path):
+        svg = tmp_path / "clip-left.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="200px" height="100px">'
+            '<text x="10" y="50" text-anchor="end" font-size="10px">'
+            'Right-aligned text that extends left</text>'
+            '</svg>'
+        )
+        errors = check_text_outside_viewport(svg)
+        assert errors
+        assert "left" in errors[0]
+
+    def test_fixture_detects_clipping(self):
+        fixture = FIXTURES_DIR / "svgwrite-text-outside-viewport.svg"
+        assert fixture.exists()
+        errors = check_text_outside_viewport(fixture)
+        assert len(errors) >= 2, (
+            f"Expected at least 2 viewport clipping errors, "
             f"got {len(errors)}: " + "\n".join(errors)
         )

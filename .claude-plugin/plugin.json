@@ -1,6 +1,6 @@
 {
   "name": "diagram-claude-plugin",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Generate professional diagrams from natural language using the best-fit Python library for each diagram type.",
   "author": {
     "name": "Edmondo Porcu"
