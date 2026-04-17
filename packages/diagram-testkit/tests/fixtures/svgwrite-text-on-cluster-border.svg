@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="300">
+<rect x="0" y="0" width="500" height="300" fill="#fff" />
+<!-- Cluster with dashed border -->
+<rect x="50" y="50" width="300" height="200" rx="6" fill="none" stroke="#7986CB" stroke-width="2.0" stroke-dasharray="8,4" />
+<text x="62" y="68" font-size="12" font-weight="bold" fill="#555">My Cluster</text>
+<!-- Box inside cluster -->
+<rect x="80" y="100" width="120" height="40" rx="6" fill="#E8EAF6" stroke="#7986CB" stroke-width="1.5" />
+<text x="140" y="124" text-anchor="middle" font-size="10">Inner Box</text>
+<!-- Edge label that sits right on the cluster's right border at x=350 -->
+<text x="330" y="155" font-size="9" fill="#555">[D] GraphQL</text>
+<!-- Edge label that sits right on the cluster's bottom border at y=250 -->
+<text x="150" y="252" text-anchor="middle" font-size="9" fill="#555">[D] Presto</text>
+</svg>

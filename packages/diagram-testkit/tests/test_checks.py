@@ -10,8 +10,11 @@ import pytest
 
 from diagram_testkit.checks import check_arrow_crosses_text
 from diagram_testkit.checks import check_container_alignment
+from diagram_testkit.checks import check_child_rect_clips_parent
 from diagram_testkit.checks import check_line_crosses_text
 from diagram_testkit.checks import check_path_crosses_text
+from diagram_testkit.checks import check_path_endpoint_inside_rect
+from diagram_testkit.checks import check_text_on_cluster_border
 from diagram_testkit.checks import check_text_outside_viewport
 from diagram_testkit.checks import check_text_overlaps_text
 from diagram_testkit.checks import check_text_overflows_rect
@@ -326,5 +329,150 @@ class TestTextOutsideViewport:
         errors = check_text_outside_viewport(fixture)
         assert len(errors) >= 2, (
             f"Expected at least 2 viewport clipping errors, "
+            f"got {len(errors)}: " + "\n".join(errors)
+        )
+
+
+class TestPathEndpointInsideRect:
+
+    def test_endpoint_inside_rect_detected(self, tmp_path):
+        svg = tmp_path / "overflow.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<rect x="250" y="70" width="100" height="40" fill="#E8EAF6" stroke="#7986CB" />'
+            '<text x="300" y="94" text-anchor="middle" font-size="10">Dest</text>'
+            '<path d="M150,90 C200,90,240,90,280,90" stroke="#666" fill="none" />'
+            '</svg>'
+        )
+        errors = check_path_endpoint_inside_rect(svg)
+        assert errors
+        assert "inside rect" in errors[0]
+
+    def test_endpoint_on_border_passes(self, tmp_path):
+        svg = tmp_path / "ok.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<rect x="250" y="70" width="100" height="40" fill="#E8EAF6" stroke="#7986CB" />'
+            '<text x="300" y="94" text-anchor="middle" font-size="10">Dest</text>'
+            '<path d="M150,90 L250,90" stroke="#666" fill="none" />'
+            '</svg>'
+        )
+        errors = check_path_endpoint_inside_rect(svg)
+        assert not errors
+
+    def test_marker_paths_skipped(self, tmp_path):
+        svg = tmp_path / "marker.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<defs><marker id="arrow">'
+            '<path d="M0,-2.5 L6,0 L0,2.5" fill="#666" />'
+            '</marker></defs>'
+            '<rect x="250" y="70" width="100" height="40" fill="#E8EAF6" stroke="#7986CB" />'
+            '</svg>'
+        )
+        errors = check_path_endpoint_inside_rect(svg)
+        assert not errors
+
+    def test_fixture_detects_overflow(self):
+        fixture = FIXTURES_DIR / "svgwrite-path-endpoint-inside-rect.svg"
+        assert fixture.exists()
+        errors = check_path_endpoint_inside_rect(fixture)
+        assert errors, "Fixture should detect arrow endpoint inside rect"
+        assert any("inside rect" in e for e in errors)
+
+
+class TestTextOnClusterBorder:
+
+    def test_text_on_dashed_border_detected(self, tmp_path):
+        svg = tmp_path / "on-border.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<rect x="50" y="50" width="200" height="100" fill="none" '
+            'stroke="#7986CB" stroke-width="2" stroke-dasharray="8,4" />'
+            '<text x="230" y="105" font-size="9">[D] GraphQL</text>'
+            '</svg>'
+        )
+        errors = check_text_on_cluster_border(svg)
+        assert errors
+        assert "cluster border" in errors[0]
+
+    def test_text_far_from_border_passes(self, tmp_path):
+        svg = tmp_path / "ok.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<rect x="50" y="50" width="200" height="100" fill="none" '
+            'stroke="#7986CB" stroke-width="2" stroke-dasharray="8,4" />'
+            '<text x="150" y="105" text-anchor="middle" font-size="9">Inside</text>'
+            '</svg>'
+        )
+        errors = check_text_on_cluster_border(svg)
+        assert not errors
+
+    def test_cluster_title_skipped(self, tmp_path):
+        svg = tmp_path / "title.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<rect x="50" y="50" width="200" height="100" fill="none" '
+            'stroke="#7986CB" stroke-width="2" stroke-dasharray="8,4" />'
+            '<text x="62" y="68" font-size="12" font-weight="bold">IBT</text>'
+            '</svg>'
+        )
+        errors = check_text_on_cluster_border(svg)
+        assert not errors
+
+    def test_fixture_detects_border_overlap(self):
+        fixture = FIXTURES_DIR / "svgwrite-text-on-cluster-border.svg"
+        assert fixture.exists()
+        errors = check_text_on_cluster_border(fixture)
+        assert len(errors) >= 2, (
+            f"Expected at least 2 text-on-border errors, "
+            f"got {len(errors)}: " + "\n".join(errors)
+        )
+
+
+class TestChildRectClipsParent:
+
+    def test_clipping_child_detected(self, tmp_path):
+        svg = tmp_path / "clip.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<rect x="50" y="50" width="200" height="100" fill="none" '
+            'stroke="#81C784" stroke-width="2" stroke-dasharray="8,4" />'
+            '<rect x="48" y="70" width="100" height="40" fill="#E8F5E9" stroke="#81C784" />'
+            '<text x="98" y="94" text-anchor="middle" font-size="10">Clip</text>'
+            '</svg>'
+        )
+        errors = check_child_rect_clips_parent(svg)
+        assert errors
+        assert "clips parent" in errors[0]
+        assert "left" in errors[0]
+
+    def test_well_placed_child_passes(self, tmp_path):
+        svg = tmp_path / "ok.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<rect x="50" y="50" width="200" height="100" fill="none" '
+            'stroke="#81C784" stroke-width="2" stroke-dasharray="8,4" />'
+            '<rect x="70" y="70" width="100" height="40" fill="#E8F5E9" stroke="#81C784" />'
+            '<text x="120" y="94" text-anchor="middle" font-size="10">OK</text>'
+            '</svg>'
+        )
+        errors = check_child_rect_clips_parent(svg)
+        assert not errors
+
+    def test_fixture_detects_clipping(self):
+        fixture = FIXTURES_DIR / "svgwrite-child-rect-clips-parent.svg"
+        assert fixture.exists()
+        errors = check_child_rect_clips_parent(fixture)
+        assert len(errors) >= 2, (
+            f"Expected at least 2 clipping errors, "
             f"got {len(errors)}: " + "\n".join(errors)
         )

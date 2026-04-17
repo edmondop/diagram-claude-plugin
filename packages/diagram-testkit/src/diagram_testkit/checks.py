@@ -300,7 +300,11 @@ def check_path_crosses_text(
     return errors
 
 
-def _parse_rect_bbox(rect_el: ET.Element) -> BBox | None:
+def _parse_rect_bbox(
+    rect_el: ET.Element,
+    *,
+    max_area: float = 500_000,
+) -> BBox | None:
     x = rect_el.get("x")
     y = rect_el.get("y")
     w = rect_el.get("width")
@@ -308,7 +312,7 @@ def _parse_rect_bbox(rect_el: ET.Element) -> BBox | None:
     if any(v is None for v in (x, y, w, h)):
         return None
     fx, fy, fw, fh = float(x), float(y), float(w), float(h)  # type: ignore[arg-type]
-    if fw * fh > 500_000:
+    if fw * fh > max_area:
         return None
     return BBox(fx, fy, fx + fw, fy + fh)
 
@@ -330,6 +334,188 @@ def _is_inside_defs(
 
 def _point_in_bbox(x: float, y: float, bb: BBox) -> bool:
     return bb.x_min <= x <= bb.x_max and bb.y_min <= y <= bb.y_max
+
+
+PATH_ENDPOINT_INSET = 4.0  # px — endpoint must be this far inside to count
+CLUSTER_BORDER_TEXT_PADDING = 3.0  # px buffer around dashed border
+CHILD_RECT_MIN_MARGIN = 2.0  # px minimum gap between child and parent rect
+
+
+def check_path_endpoint_inside_rect(
+    svg_path: Path,
+    *,
+    inset: float = PATH_ENDPOINT_INSET,
+) -> list[str]:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    parent_map = {child: parent for parent in root.iter() for child in parent}
+
+    text_labels: list[tuple[str, BBox]] = []
+    for text_el in root.iter("text"):
+        content = text_el.text or ""
+        if not content.strip():
+            continue
+        tb = text_bbox(text_el)
+        if tb is not None:
+            text_labels.append((content.strip(), tb))
+
+    solid_rects: list[tuple[BBox, str]] = []
+    for rect_el in root.iter("rect"):
+        if rect_el.get("stroke-dasharray"):
+            continue
+        rb = _parse_rect_bbox(rect_el, max_area=50_000)
+        if rb is None:
+            continue
+        label = ""
+        for name, tb in text_labels:
+            if (rb.x_min <= tb.cx <= rb.x_max
+                    and rb.y_min <= (tb.y_min + tb.y_max) / 2 <= rb.y_max):
+                label = name
+                break
+        solid_rects.append((rb, label))
+
+    errors: list[str] = []
+    for path_el in root.iter("path"):
+        d = path_el.get("d", "")
+        if not d:
+            continue
+        if _is_inside_defs(path_el, parent_map):
+            continue
+        try:
+            parsed = parse_path(d)
+        except Exception:
+            continue
+
+        for t_val in (0.0, 1.0):
+            pt = parsed.point(t_val)
+            px, py = pt.real, pt.imag
+            for rb, label in solid_rects:
+                if (rb.x_min + inset < px < rb.x_max - inset
+                        and rb.y_min + inset < py < rb.y_max - inset):
+                    desc = f"'{label}'" if label else "unlabeled"
+                    end = "start" if t_val == 0.0 else "end"
+                    errors.append(
+                        f"Path {end}point inside rect {desc} "
+                        f"at ({px:.0f}, {py:.0f})"
+                    )
+
+    return errors
+
+
+def check_text_on_cluster_border(
+    svg_path: Path,
+    *,
+    padding: float = CLUSTER_BORDER_TEXT_PADDING,
+) -> list[str]:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    cluster_rects: list[tuple[BBox, float]] = []
+    for rect_el in root.iter("rect"):
+        if not rect_el.get("stroke-dasharray"):
+            continue
+        rb = _parse_rect_bbox(rect_el)
+        if rb is None:
+            continue
+        stroke_w = float(rect_el.get("stroke-width", "2"))
+        cluster_rects.append((rb, stroke_w))
+
+    text_labels: list[tuple[str, BBox]] = []
+    for text_el in root.iter("text"):
+        content = text_el.text or ""
+        if not content.strip():
+            continue
+        tb = text_bbox(text_el)
+        if tb is not None:
+            text_labels.append((content.strip(), tb))
+
+    errors: list[str] = []
+    for label, tb in text_labels:
+        text_poly = tb.to_shapely()
+        for rb, stroke_w in cluster_rects:
+            border = rb.to_shapely().boundary.buffer(stroke_w / 2 + padding)
+            if text_poly.intersects(border):
+                # Skip cluster's own title label (positioned inside, near top-left)
+                if (rb.x_min < tb.cx < rb.x_min + rb.width * 0.4
+                        and rb.y_min < (tb.y_min + tb.y_max) / 2 < rb.y_min + 30):
+                    continue
+                errors.append(
+                    f"Text '{label}' overlaps cluster border"
+                )
+
+    return errors
+
+
+def check_child_rect_clips_parent(
+    svg_path: Path,
+    *,
+    min_margin: float = CHILD_RECT_MIN_MARGIN,
+) -> list[str]:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    text_labels: list[tuple[str, BBox]] = []
+    for text_el in root.iter("text"):
+        content = text_el.text or ""
+        if not content.strip():
+            continue
+        tb = text_bbox(text_el)
+        if tb is not None:
+            text_labels.append((content.strip(), tb))
+
+    parent_rects: list[BBox] = []
+    child_rects: list[tuple[BBox, str]] = []
+    for rect_el in root.iter("rect"):
+        if rect_el.get("stroke-dasharray"):
+            rb = _parse_rect_bbox(rect_el)
+            if rb is not None:
+                parent_rects.append(rb)
+            continue
+        rb = _parse_rect_bbox(rect_el, max_area=50_000)
+        if rb is None:
+            continue
+        label = ""
+        for name, tb in text_labels:
+            if (rb.x_min <= tb.cx <= rb.x_max
+                    and rb.y_min <= (tb.y_min + tb.y_max) / 2 <= rb.y_max):
+                label = name
+                break
+        child_rects.append((rb, label))
+
+    errors: list[str] = []
+    for cb, label in child_rects:
+        for pb in parent_rects:
+            # Check if child center is inside parent (it's a child)
+            if not (pb.x_min < cb.cx < pb.x_max
+                    and pb.y_min < (cb.y_min + cb.y_max) / 2 < pb.y_max):
+                continue
+            clips: list[str] = []
+            if cb.x_min < pb.x_min + min_margin:
+                clips.append("left")
+            if cb.x_max > pb.x_max - min_margin:
+                clips.append("right")
+            if cb.y_min < pb.y_min + min_margin:
+                clips.append("top")
+            if cb.y_max > pb.y_max - min_margin:
+                clips.append("bottom")
+            if clips:
+                desc = f"'{label}'" if label else "unlabeled"
+                errors.append(
+                    f"Child rect {desc} clips parent border "
+                    f"on {', '.join(clips)}"
+                )
+
+    return errors
 
 
 def check_text_outside_viewport(
@@ -399,4 +585,7 @@ def run_all_checks_with_file(
         errors.extend(check_line_crosses_text(svg_path))
         errors.extend(check_path_crosses_text(svg_path))
         errors.extend(check_text_outside_viewport(svg_path))
+        errors.extend(check_path_endpoint_inside_rect(svg_path))
+        errors.extend(check_text_on_cluster_border(svg_path))
+        errors.extend(check_child_rect_clips_parent(svg_path))
     return errors

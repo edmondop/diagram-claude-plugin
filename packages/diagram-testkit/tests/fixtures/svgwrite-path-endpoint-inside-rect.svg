@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
+<rect x="0" y="0" width="400" height="200" fill="#fff" />
+<!-- Source box -->
+<rect x="50" y="70" width="100" height="40" rx="6" fill="#E8EAF6" stroke="#7986CB" stroke-width="1.5" />
+<text x="100" y="94" text-anchor="middle" font-size="10">Source</text>
+<!-- Destination box -->
+<rect x="250" y="70" width="100" height="40" rx="6" fill="#E8EAF6" stroke="#7986CB" stroke-width="1.5" />
+<text x="300" y="94" text-anchor="middle" font-size="10">Destination</text>
+<!-- Arrow that overshoots INTO the destination rect (endpoint at x=280, well inside 250..350) -->
+<path d="M150,90 C200,90,240,90,280,90" stroke="#666" stroke-width="1.2" fill="none" />
+</svg>
