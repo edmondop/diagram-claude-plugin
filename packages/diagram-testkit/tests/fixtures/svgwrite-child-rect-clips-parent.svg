@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="300">
+<rect x="0" y="0" width="500" height="300" fill="#fff" />
+<!-- Parent container with dashed border -->
+<rect x="50" y="50" width="300" height="180" rx="6" fill="none" stroke="#81C784" stroke-width="2.0" stroke-dasharray="8,4" />
+<text x="62" y="68" font-size="12" font-weight="bold" fill="#555">Container</text>
+<!-- Child box that clips the left border (x=48, parent starts at x=50) -->
+<rect x="48" y="90" width="120" height="40" rx="6" fill="#E8F5E9" stroke="#81C784" stroke-width="1.5" />
+<text x="108" y="114" text-anchor="middle" font-size="10">Clips Left</text>
+<!-- Child box that clips the bottom border (y+h=232, parent ends at y=230) -->
+<rect x="200" y="192" width="120" height="40" rx="6" fill="#E8F5E9" stroke="#81C784" stroke-width="1.5" />
+<text x="260" y="216" text-anchor="middle" font-size="10">Clips Bottom</text>
+<!-- Well-placed child for comparison -->
+<rect x="200" y="90" width="120" height="40" rx="6" fill="#E8F5E9" stroke="#81C784" stroke-width="1.5" />
+<text x="260" y="114" text-anchor="middle" font-size="10">OK Box</text>
+</svg>

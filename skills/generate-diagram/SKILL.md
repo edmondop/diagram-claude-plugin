@@ -8,7 +8,7 @@ description: Use when generating diagrams, charts, or technical illustrations.
   "excalidraw", "hand-drawn diagram", "sketch diagram",
   or any request for visual/graphical output in SVG or PNG format.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
-version: 0.4.0
+version: 0.5.0
 ---
 
 # Diagram Generation

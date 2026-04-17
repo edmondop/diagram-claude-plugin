@@ -1,16 +1,21 @@
 """Tests for SVG quality checks.
 
-Critical: every fixture SVG must fail at least one check.
+Critical: every fixture SVG in FIXTURES_DIR must fail at least one check.
 If a fixture passes all checks, the test suite itself is broken.
+
+Passing fixtures (no expected errors) live in PASSING_DIR and are NOT
+included in TestFixturesMustFail.
 """
 
 from pathlib import Path
 
-import pytest
-
 from diagram_testkit.checks import check_arrow_crosses_text
+from diagram_testkit.checks import check_child_rect_clips_parent
 from diagram_testkit.checks import check_container_alignment
 from diagram_testkit.checks import check_line_crosses_text
+from diagram_testkit.checks import check_path_crosses_text
+from diagram_testkit.checks import check_path_endpoint_inside_rect
+from diagram_testkit.checks import check_text_on_cluster_border
 from diagram_testkit.checks import check_text_outside_viewport
 from diagram_testkit.checks import check_text_overlaps_text
 from diagram_testkit.checks import check_text_overflows_rect
@@ -22,7 +27,10 @@ from diagram_testkit.model import Container
 from diagram_testkit.model import DiagramElements
 from diagram_testkit.model import TextLabel
 
+import pytest
+
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+PASSING_DIR = FIXTURES_DIR / "passing"
 
 
 class TestFixturesMustFail:
@@ -129,41 +137,17 @@ class TestContainerAlignment:
 
 class TestTextOverflowsRect:
 
-    def test_text_fitting_inside_rect_passes(self, tmp_path):
-        svg = tmp_path / "ok.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<rect x="0" y="0" width="200" height="40" />'
-            '<text x="100" y="25" text-anchor="middle" '
-            'font-size="11px">Short</text>'
-            '</svg>'
-        )
-        errors = check_text_overflows_rect(svg)
+    def test_text_fitting_inside_rect_passes(self):
+        errors = check_text_overflows_rect(PASSING_DIR / "text-fits-inside-rect.svg")
         assert not errors
 
-    def test_text_overflowing_rect_detected(self, tmp_path):
-        svg = tmp_path / "overflow.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<rect x="100" y="0" width="80" height="40" />'
-            '<text x="140" y="25" text-anchor="middle" '
-            'font-size="11px">This label is way too long for the box</text>'
-            '</svg>'
-        )
-        errors = check_text_overflows_rect(svg)
+    def test_text_overflowing_rect_detected(self):
+        errors = check_text_overflows_rect(FIXTURES_DIR / "inline-text-overflows-rect.svg")
         assert errors
         assert "overflows" in errors[0]
 
-    def test_text_outside_rect_ignored(self, tmp_path):
-        svg = tmp_path / "outside.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<rect x="0" y="0" width="50" height="40" />'
-            '<text x="400" y="25" text-anchor="middle" '
-            'font-size="11px">This text is far away from the rect</text>'
-            '</svg>'
-        )
-        errors = check_text_overflows_rect(svg)
+    def test_text_outside_rect_ignored(self):
+        errors = check_text_overflows_rect(PASSING_DIR / "text-outside-rect.svg")
         assert not errors
 
     def test_fixture_detects_overflow(self):
@@ -180,29 +164,13 @@ class TestTextOverflowsRect:
 
 class TestLineCrossesText:
 
-    def test_line_through_text_detected(self, tmp_path):
-        svg = tmp_path / "crossing.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<text x="100" y="55" text-anchor="middle" '
-            'font-size="13px">Label</text>'
-            '<line x1="50" y1="50" x2="150" y2="50" stroke="#333" />'
-            '</svg>'
-        )
-        errors = check_line_crosses_text(svg)
+    def test_line_through_text_detected(self):
+        errors = check_line_crosses_text(FIXTURES_DIR / "inline-line-crosses-text.svg")
         assert errors
         assert "Label" in errors[0]
 
-    def test_line_far_from_text_passes(self, tmp_path):
-        svg = tmp_path / "ok.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<text x="100" y="50" text-anchor="middle" '
-            'font-size="13px">Label</text>'
-            '<line x1="50" y1="200" x2="150" y2="200" stroke="#333" />'
-            '</svg>'
-        )
-        errors = check_line_crosses_text(svg)
+    def test_line_far_from_text_passes(self):
+        errors = check_line_crosses_text(PASSING_DIR / "line-far-from-text.svg")
         assert not errors
 
     def test_fixture_detects_crossing(self):
@@ -215,40 +183,53 @@ class TestLineCrossesText:
         )
 
 
-class TestTextOutsideViewport:
+class TestPathCrossesText:
 
-    def test_text_inside_viewport_passes(self, tmp_path):
-        svg = tmp_path / "ok.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="400px" height="200px">'
-            '<text x="200" y="100" text-anchor="middle" '
-            'font-size="10px">Centered</text>'
-            '</svg>'
-        )
-        errors = check_text_outside_viewport(svg)
+    def test_bezier_through_text_detected(self):
+        errors = check_path_crosses_text(FIXTURES_DIR / "inline-path-crosses-text.svg")
+        assert errors
+        assert "Label" in errors[0]
+
+    def test_bezier_through_rect_detected(self):
+        errors = check_path_crosses_text(FIXTURES_DIR / "inline-path-crosses-rect.svg")
+        rect_errors = [e for e in errors if "rect" in e.lower()]
+        assert rect_errors, f"Expected path-crosses-rect error, got: {errors}"
+
+    def test_path_not_crossing_passes(self):
+        errors = check_path_crosses_text(PASSING_DIR / "path-not-crossing.svg")
         assert not errors
 
-    def test_text_clipped_right_detected(self, tmp_path):
-        svg = tmp_path / "clip-right.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="200px" height="100px">'
-            '<text x="180" y="50" font-size="10px">'
-            'This text runs way past the right edge</text>'
-            '</svg>'
+    def test_marker_paths_in_defs_skipped(self):
+        errors = check_path_crosses_text(PASSING_DIR / "marker-paths-in-defs.svg")
+        assert not errors
+
+    def test_fixture_detects_crossings(self):
+        fixture = FIXTURES_DIR / "svgwrite-path-crosses-text-and-rect.svg"
+        assert fixture.exists()
+        errors = check_path_crosses_text(fixture)
+        text_errors = [e for e in errors if "text" in e.lower()]
+        rect_errors = [e for e in errors if "rect" in e.lower()]
+        assert text_errors, (
+            f"Expected path-crosses-text errors, got: {errors}"
         )
-        errors = check_text_outside_viewport(svg)
+        assert rect_errors, (
+            f"Expected path-crosses-rect errors, got: {errors}"
+        )
+
+
+class TestTextOutsideViewport:
+
+    def test_text_inside_viewport_passes(self):
+        errors = check_text_outside_viewport(PASSING_DIR / "text-inside-viewport.svg")
+        assert not errors
+
+    def test_text_clipped_right_detected(self):
+        errors = check_text_outside_viewport(FIXTURES_DIR / "inline-viewport-clip-right.svg")
         assert errors
         assert "right" in errors[0]
 
-    def test_text_clipped_left_detected(self, tmp_path):
-        svg = tmp_path / "clip-left.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="200px" height="100px">'
-            '<text x="10" y="50" text-anchor="end" font-size="10px">'
-            'Right-aligned text that extends left</text>'
-            '</svg>'
-        )
-        errors = check_text_outside_viewport(svg)
+    def test_text_clipped_left_detected(self):
+        errors = check_text_outside_viewport(FIXTURES_DIR / "inline-viewport-clip-left.svg")
         assert errors
         assert "left" in errors[0]
 
@@ -258,5 +239,75 @@ class TestTextOutsideViewport:
         errors = check_text_outside_viewport(fixture)
         assert len(errors) >= 2, (
             f"Expected at least 2 viewport clipping errors, "
+            f"got {len(errors)}: " + "\n".join(errors)
+        )
+
+
+class TestPathEndpointInsideRect:
+
+    def test_endpoint_inside_rect_detected(self):
+        errors = check_path_endpoint_inside_rect(FIXTURES_DIR / "inline-endpoint-inside-rect.svg")
+        assert errors
+        assert "inside rect" in errors[0]
+
+    def test_endpoint_on_border_passes(self):
+        errors = check_path_endpoint_inside_rect(PASSING_DIR / "endpoint-on-border.svg")
+        assert not errors
+
+    def test_marker_paths_skipped(self):
+        errors = check_path_endpoint_inside_rect(PASSING_DIR / "marker-paths-skipped.svg")
+        assert not errors
+
+    def test_fixture_detects_overflow(self):
+        fixture = FIXTURES_DIR / "svgwrite-path-endpoint-inside-rect.svg"
+        assert fixture.exists()
+        errors = check_path_endpoint_inside_rect(fixture)
+        assert errors, "Fixture should detect arrow endpoint inside rect"
+        assert any("inside rect" in e for e in errors)
+
+
+class TestTextOnClusterBorder:
+
+    def test_text_on_dashed_border_detected(self):
+        errors = check_text_on_cluster_border(FIXTURES_DIR / "inline-text-on-cluster-border.svg")
+        assert errors
+        assert "cluster border" in errors[0]
+
+    def test_text_far_from_border_passes(self):
+        errors = check_text_on_cluster_border(PASSING_DIR / "text-far-from-cluster-border.svg")
+        assert not errors
+
+    def test_cluster_title_skipped(self):
+        errors = check_text_on_cluster_border(PASSING_DIR / "cluster-title-on-border.svg")
+        assert not errors
+
+    def test_fixture_detects_border_overlap(self):
+        fixture = FIXTURES_DIR / "svgwrite-text-on-cluster-border.svg"
+        assert fixture.exists()
+        errors = check_text_on_cluster_border(fixture)
+        assert len(errors) >= 2, (
+            f"Expected at least 2 text-on-border errors, "
+            f"got {len(errors)}: " + "\n".join(errors)
+        )
+
+
+class TestChildRectClipsParent:
+
+    def test_clipping_child_detected(self):
+        errors = check_child_rect_clips_parent(FIXTURES_DIR / "inline-child-clips-parent.svg")
+        assert errors
+        assert "clips parent" in errors[0]
+        assert "left" in errors[0]
+
+    def test_well_placed_child_passes(self):
+        errors = check_child_rect_clips_parent(PASSING_DIR / "child-rect-well-placed.svg")
+        assert not errors
+
+    def test_fixture_detects_clipping(self):
+        fixture = FIXTURES_DIR / "svgwrite-child-rect-clips-parent.svg"
+        assert fixture.exists()
+        errors = check_child_rect_clips_parent(fixture)
+        assert len(errors) >= 2, (
+            f"Expected at least 2 clipping errors, "
             f"got {len(errors)}: " + "\n".join(errors)
         )

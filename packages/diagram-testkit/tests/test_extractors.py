@@ -5,6 +5,7 @@ from diagram_testkit.extractors import extract
 from diagram_testkit.model import Format
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+PASSING_DIR = FIXTURES_DIR / "passing"
 
 
 class TestDetectFormat:
@@ -19,10 +20,8 @@ class TestDetectFormat:
         assert svgs, "No matplotlib fixture SVGs found"
         assert detect_format(svgs[0]) == Format.MATPLOTLIB
 
-    def test_returns_none_for_unknown_format(self, tmp_path):
-        svg = tmp_path / "plain.svg"
-        svg.write_text('<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>')
-        assert detect_format(svg) is None
+    def test_returns_none_for_unknown_format(self):
+        assert detect_format(PASSING_DIR / "plain-unknown-format.svg") is None
 
 
 class TestGraphvizExtractor:
@@ -98,16 +97,9 @@ class TestMatplotlibExtractor:
         elems = extract(svgs[0])
         assert elems.containers, "Should have axes Container"
 
-    def test_axis_off_skips_colored_patch_2_as_container(self, tmp_path):
-        svg = tmp_path / "axis-off.svg"
-        svg.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<g id="axes_1">'
-            '<g id="patch_2"><path d="M 10 10 L 50 10 L 50 50 L 10 50 z" '
-            'style="fill: #e57373; opacity: 0.85; stroke: #333"/></g>'
-            '</g></svg>'
-        )
-        elems = extract(svg, format=Format.MATPLOTLIB)
+    def test_axis_off_skips_colored_patch_2_as_container(self):
+        fixture = PASSING_DIR / "matplotlib-axis-off-colored-patch.svg"
+        elems = extract(fixture, format=Format.MATPLOTLIB)
         assert not elems.containers, (
             "Colored patch_2 (user content, not axes background) "
             "should not be treated as a container"
@@ -151,12 +143,11 @@ class TestSvgwriteExtractor:
 
 class TestExcalidrawExtractor:
 
-    def test_unknown_svg_returns_empty_elements(self, tmp_path):
-        svg = tmp_path / "plain.svg"
-        svg.write_text('<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>')
-        elems = extract(svg)
+    def test_unknown_svg_returns_empty_elements(self):
+        fixture = PASSING_DIR / "plain-unknown-format.svg"
+        elems = extract(fixture)
         assert not elems.texts
         assert not elems.arrows
         assert not elems.shapes
         assert not elems.containers
-        assert elems.source_path == svg
+        assert elems.source_path == fixture
