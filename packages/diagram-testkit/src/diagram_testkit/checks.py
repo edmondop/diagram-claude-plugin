@@ -5,6 +5,8 @@ from pathlib import Path
 
 from shapely.geometry import LineString
 
+from svgpathtools import parse_path
+
 from diagram_testkit.geometry import BBox
 from diagram_testkit.geometry import path_to_linestring
 from diagram_testkit.geometry import text_bbox
@@ -224,6 +226,112 @@ def check_line_crosses_text(
     return errors
 
 
+def check_path_crosses_text(
+    svg_path: Path,
+    *,
+    padding: float = LINE_TEXT_PADDING,
+) -> list[str]:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    parent_map = {child: parent for parent in root.iter() for child in parent}
+
+    text_labels: list[tuple[str, BBox]] = []
+    for text_el in root.iter("text"):
+        content = text_el.text or ""
+        if not content.strip():
+            continue
+        tb = text_bbox(text_el)
+        if tb is not None:
+            text_labels.append((content.strip(), tb))
+
+    # Collect solid rects (skip dashed cluster borders and canvas backgrounds)
+    rect_boxes: list[tuple[BBox, list[str]]] = []
+    for rect_el in root.iter("rect"):
+        if rect_el.get("stroke-dasharray"):
+            continue
+        rb = _parse_rect_bbox(rect_el)
+        if rb is None:
+            continue
+        contained: list[str] = []
+        for label, tb in text_labels:
+            if (rb.x_min <= tb.cx <= rb.x_max
+                    and rb.y_min <= (tb.y_min + tb.y_max) / 2 <= rb.y_max):
+                contained.append(label)
+        if contained:
+            rect_boxes.append((rb, contained))
+
+    errors: list[str] = []
+    for path_el in root.iter("path"):
+        d = path_el.get("d", "")
+        if not d:
+            continue
+        if _is_inside_defs(path_el, parent_map):
+            continue
+        try:
+            parsed = parse_path(d)
+            line = path_to_linestring(d)
+        except Exception:
+            continue
+
+        start_pt = parsed.point(0)
+        end_pt = parsed.point(1)
+        start_x, start_y = start_pt.real, start_pt.imag
+        end_x, end_y = end_pt.real, end_pt.imag
+
+        for label, tb in text_labels:
+            if _point_in_bbox(start_x, start_y, tb) or _point_in_bbox(end_x, end_y, tb):
+                continue
+            text_poly = tb.to_shapely().buffer(padding)
+            if line.intersects(text_poly):
+                errors.append(f"Path crosses text '{label}'")
+
+        for rb, contained_labels in rect_boxes:
+            if _point_in_bbox(start_x, start_y, rb) or _point_in_bbox(end_x, end_y, rb):
+                continue
+            rect_poly = rb.to_shapely()
+            if line.intersects(rect_poly):
+                label_desc = contained_labels[0] if contained_labels else "unlabeled"
+                errors.append(f"Path crosses rect '{label_desc}'")
+
+    return errors
+
+
+def _parse_rect_bbox(rect_el: ET.Element) -> BBox | None:
+    x = rect_el.get("x")
+    y = rect_el.get("y")
+    w = rect_el.get("width")
+    h = rect_el.get("height")
+    if any(v is None for v in (x, y, w, h)):
+        return None
+    fx, fy, fw, fh = float(x), float(y), float(w), float(h)  # type: ignore[arg-type]
+    if fw * fh > 500_000:
+        return None
+    return BBox(fx, fy, fx + fw, fy + fh)
+
+
+def _is_inside_defs(
+    elem: ET.Element,
+    parent_map: dict[ET.Element, ET.Element],
+) -> bool:
+    current = elem
+    for _ in range(10):
+        parent = parent_map.get(current)
+        if parent is None:
+            return False
+        if parent.tag in ("defs", "marker"):
+            return True
+        current = parent
+    return False
+
+
+def _point_in_bbox(x: float, y: float, bb: BBox) -> bool:
+    return bb.x_min <= x <= bb.x_max and bb.y_min <= y <= bb.y_max
+
+
 def check_text_outside_viewport(
     svg_path: Path,
     *,
@@ -289,5 +397,6 @@ def run_all_checks_with_file(
     if svg_path is not None:
         errors.extend(check_text_overflows_rect(svg_path))
         errors.extend(check_line_crosses_text(svg_path))
+        errors.extend(check_path_crosses_text(svg_path))
         errors.extend(check_text_outside_viewport(svg_path))
     return errors

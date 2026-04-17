@@ -11,6 +11,7 @@ import pytest
 from diagram_testkit.checks import check_arrow_crosses_text
 from diagram_testkit.checks import check_container_alignment
 from diagram_testkit.checks import check_line_crosses_text
+from diagram_testkit.checks import check_path_crosses_text
 from diagram_testkit.checks import check_text_outside_viewport
 from diagram_testkit.checks import check_text_overlaps_text
 from diagram_testkit.checks import check_text_overflows_rect
@@ -212,6 +213,73 @@ class TestLineCrossesText:
         assert len(errors) >= 3, (
             f"Expected at least 3 line-crosses-text errors (Hub + 3 spokes), "
             f"got {len(errors)}: " + "\n".join(errors)
+        )
+
+
+class TestPathCrossesText:
+
+    def test_bezier_through_text_detected(self, tmp_path):
+        svg = tmp_path / "crossing.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">'
+            '<rect x="0" y="0" width="400" height="300" fill="#fff" />'
+            '<text x="200" y="150" text-anchor="middle" font-size="10">Label</text>'
+            '<path d="M100,50 C100,150,300,150,300,250" stroke="#666" '
+            'stroke-width="1.2" fill="none" />'
+            '</svg>'
+        )
+        errors = check_path_crosses_text(svg)
+        assert errors
+        assert "Label" in errors[0]
+
+    def test_bezier_through_rect_detected(self, tmp_path):
+        svg = tmp_path / "rect-crossing.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect x="0" y="0" width="400" height="200" fill="#fff" />'
+            '<rect x="150" y="50" width="100" height="40" fill="#eee" stroke="#999" />'
+            '<text x="200" y="74" text-anchor="middle" font-size="10">Box</text>'
+            '<path d="M50,70 L350,70" stroke="#666" stroke-width="1.2" fill="none" />'
+            '</svg>'
+        )
+        errors = check_path_crosses_text(svg)
+        rect_errors = [e for e in errors if "rect" in e.lower()]
+        assert rect_errors, f"Expected path-crosses-rect error, got: {errors}"
+
+    def test_path_not_crossing_passes(self, tmp_path):
+        svg = tmp_path / "ok.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">'
+            '<rect x="0" y="0" width="400" height="300" fill="#fff" />'
+            '<text x="200" y="50" text-anchor="middle" font-size="10">Label</text>'
+            '<path d="M50,200 L350,200" stroke="#666" stroke-width="1.2" fill="none" />'
+            '</svg>'
+        )
+        errors = check_path_crosses_text(svg)
+        assert not errors
+
+    def test_marker_paths_in_defs_skipped(self, tmp_path):
+        svg = tmp_path / "marker.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">'
+            '<defs><marker id="arrow"><path d="M0,-2.5 L6,0 L0,2.5" /></marker></defs>'
+            '<text x="200" y="150" text-anchor="middle" font-size="10">Label</text>'
+            '</svg>'
+        )
+        errors = check_path_crosses_text(svg)
+        assert not errors
+
+    def test_fixture_detects_crossings(self):
+        fixture = FIXTURES_DIR / "svgwrite-path-crosses-text-and-rect.svg"
+        assert fixture.exists()
+        errors = check_path_crosses_text(fixture)
+        text_errors = [e for e in errors if "text" in e.lower()]
+        rect_errors = [e for e in errors if "rect" in e.lower()]
+        assert text_errors, (
+            f"Expected path-crosses-text errors, got: {errors}"
+        )
+        assert rect_errors, (
+            f"Expected path-crosses-rect errors, got: {errors}"
         )
 
 
