@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+<!-- Background -->
+<rect x="0" y="0" width="400" height="300" fill="#FAFAFA" />
+
+<!-- Bug 1: Text sitting on the bottom border of a solid-bordered rect.
+     The rect bottom edge is at y=150 (y=50 + height=100).
+     The text baseline is at y=150, so the text bbox (y=140..150) sits
+     right on the border. -->
+<rect x="30" y="50" width="200" height="100" fill="#E3F2FD" stroke="#5C6BC0" stroke-width="2" />
+<text x="30" y="100" font-size="10">Component A</text>
+<text x="30" y="153" font-size="10">Border Label</text>
+
+<!-- Bug 2: Z-order occlusion — filled rect drawn AFTER text covers it.
+     The text "Hidden Title" is drawn first at y=210 (bbox y=200..210).
+     Then a filled rect is drawn on top, covering that region. -->
+<text x="50" y="210" font-size="10">Hidden Title</text>
+<rect x="40" y="195" width="180" height="80" fill="#E8F5E9" stroke="#66BB6A" stroke-width="2" />
+<text x="50" y="250" font-size="10">Component B</text>
+</svg>
