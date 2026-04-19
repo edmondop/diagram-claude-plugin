@@ -338,6 +338,7 @@ def _point_in_bbox(x: float, y: float, bb: BBox) -> bool:
 
 PATH_ENDPOINT_INSET = 4.0  # px — endpoint must be this far inside to count
 CLUSTER_BORDER_TEXT_PADDING = 3.0  # px buffer around dashed border
+SOLID_BORDER_TEXT_PADDING = 3.0  # px buffer around solid border
 CHILD_RECT_MIN_MARGIN = 2.0  # px minimum gap between child and parent rect
 
 
@@ -518,6 +519,98 @@ def check_child_rect_clips_parent(
     return errors
 
 
+def check_text_on_solid_border(
+    svg_path: Path,
+    *,
+    padding: float = SOLID_BORDER_TEXT_PADDING,
+) -> list[str]:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    solid_rects: list[tuple[BBox, float]] = []
+    for rect_el in root.iter("rect"):
+        if rect_el.get("stroke-dasharray"):
+            continue
+        rb = _parse_rect_bbox(rect_el)
+        if rb is None:
+            continue
+        stroke = rect_el.get("stroke")
+        if not stroke or stroke == "none":
+            continue
+        stroke_w = float(rect_el.get("stroke-width", "2"))
+        solid_rects.append((rb, stroke_w))
+
+    text_labels: list[tuple[str, BBox]] = []
+    for text_el in root.iter("text"):
+        content = text_el.text or ""
+        if not content.strip():
+            continue
+        tb = text_bbox(text_el)
+        if tb is not None:
+            text_labels.append((content.strip(), tb))
+
+    errors: list[str] = []
+    for label, tb in text_labels:
+        text_poly = tb.to_shapely()
+        text_cy = (tb.y_min + tb.y_max) / 2
+        for rb, stroke_w in solid_rects:
+            # Skip text whose center is clearly inside the rect (it's a label)
+            if (rb.x_min + padding < tb.cx < rb.x_max - padding
+                    and rb.y_min + padding < text_cy < rb.y_max - padding):
+                continue
+            border = rb.to_shapely().boundary.buffer(stroke_w / 2 + padding)
+            if text_poly.intersects(border):
+                errors.append(
+                    f"Text '{label}' overlaps solid rect border"
+                )
+
+    return errors
+
+
+def check_text_occluded_by_rect(
+    svg_path: Path,
+) -> list[str]:
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    # Walk elements in document order, tracking text elements seen so far
+    preceding_texts: list[tuple[str, BBox]] = []
+    errors: list[str] = []
+
+    for elem in root.iter():
+        if elem.tag == "text":
+            content = elem.text or ""
+            if not content.strip():
+                continue
+            tb = text_bbox(elem)
+            if tb is not None:
+                preceding_texts.append((content.strip(), tb))
+        elif elem.tag == "rect":
+            fill = elem.get("fill", "")
+            if not fill or fill == "none" or fill == "transparent":
+                continue
+            rb = _parse_rect_bbox(elem)
+            if rb is None:
+                continue
+            for label, tb in preceding_texts:
+                if (rb.x_min <= tb.x_min
+                        and rb.y_min <= tb.y_min
+                        and rb.x_max >= tb.x_max
+                        and rb.y_max >= tb.y_max):
+                    errors.append(
+                        f"Text '{label}' occluded by later rect "
+                        f"(fill={fill})"
+                    )
+
+    return errors
+
+
 def check_text_outside_viewport(
     svg_path: Path,
     *,
@@ -588,4 +681,6 @@ def run_all_checks_with_file(
         errors.extend(check_path_endpoint_inside_rect(svg_path))
         errors.extend(check_text_on_cluster_border(svg_path))
         errors.extend(check_child_rect_clips_parent(svg_path))
+        errors.extend(check_text_on_solid_border(svg_path))
+        errors.extend(check_text_occluded_by_rect(svg_path))
     return errors
