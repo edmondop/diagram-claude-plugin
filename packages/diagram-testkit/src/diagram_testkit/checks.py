@@ -1,14 +1,18 @@
 """Format-agnostic SVG quality checks operating on DiagramElements."""
 
+from __future__ import annotations
+
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 from shapely.geometry import LineString
 
-from svgpathtools import parse_path
+from svgpathtools import parse_path as _svgpathtools_parse_path
 
 from diagram_testkit.geometry import BBox
 from diagram_testkit.geometry import path_to_linestring
+from diagram_testkit.geometry import resolve_ancestor_transform
 from diagram_testkit.geometry import text_bbox
 from diagram_testkit.model import DiagramElements
 
@@ -17,6 +21,82 @@ LINE_TEXT_PADDING = 2.0
 BORDER_STROKE_WIDTH = 2.0
 MAX_CENTER_OFFSET_RATIO = 0.7
 TEXT_OVERFLOW_MARGIN = 4.0  # px tolerance for text-in-rect checks
+
+
+def _build_parent_map(root: ET.Element) -> dict[ET.Element, ET.Element]:
+    return {child: parent for parent in root.iter() for child in parent}
+
+
+def _resolve_rect_bbox(
+    rect_el: ET.Element,
+    parent_map: dict[ET.Element, ET.Element],
+) -> BBox | None:
+    """Parse rect attributes and apply ancestor transforms."""
+    x = rect_el.get("x")
+    y = rect_el.get("y")
+    w = rect_el.get("width")
+    h = rect_el.get("height")
+    if any(v is None for v in (x, y, w, h)):
+        return None
+    fx, fy = float(x), float(y)  # type: ignore[arg-type]
+    fw, fh = float(w), float(h)  # type: ignore[arg-type]
+    tx, ty, sx, sy = resolve_ancestor_transform(rect_el, parent_map)
+    x_min = fx * sx + tx
+    y_min = fy * sy + ty
+    x_max = (fx + fw) * sx + tx
+    y_max = (fy + fh) * sy + ty
+    return BBox(x_min, y_min, x_max, y_max)
+
+
+def _resolve_line_coords(
+    line_el: ET.Element,
+    parent_map: dict[ET.Element, ET.Element],
+) -> tuple[float, float, float, float] | None:
+    """Parse line attributes and apply ancestor transforms."""
+    coords = (
+        line_el.get("x1"), line_el.get("y1"),
+        line_el.get("x2"), line_el.get("y2"),
+    )
+    if any(v is None for v in coords):
+        return None
+    x1, y1, x2, y2 = (float(v) for v in coords)  # type: ignore[arg-type]
+    tx, ty, sx, sy = resolve_ancestor_transform(line_el, parent_map)
+    return (
+        x1 * sx + tx, y1 * sy + ty,
+        x2 * sx + tx, y2 * sy + ty,
+    )
+
+
+def _resolve_path_linestring(
+    path_el: ET.Element,
+    parent_map: dict[ET.Element, ET.Element],
+) -> tuple[LineString, "Any", float, float, float, float] | None:
+    """Parse a path's d attribute, apply ancestor transforms, return linestring and endpoints."""
+    d = path_el.get("d", "")
+    if not d:
+        return None
+    try:
+        parsed = _svgpathtools_parse_path(d)
+        line = path_to_linestring(d)
+    except Exception:
+        return None
+
+    tx, ty, sx, sy = resolve_ancestor_transform(path_el, parent_map)
+
+    if tx != 0 or ty != 0 or sx != 1 or sy != 1:
+        # Transform the linestring coordinates
+        coords = list(line.coords)
+        transformed = [(x * sx + tx, y * sy + ty) for x, y in coords]
+        line = LineString(transformed)
+
+    start_pt = parsed.point(0)
+    end_pt = parsed.point(1)
+    start_x = start_pt.real * sx + tx
+    start_y = start_pt.imag * sy + ty
+    end_x = end_pt.real * sx + tx
+    end_y = end_pt.imag * sy + ty
+
+    return line, parsed, start_x, start_y, end_x, end_y
 
 
 def check_arrow_crosses_text(
@@ -136,24 +216,20 @@ def check_text_overflows_rect(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
+    parent_map = _build_parent_map(root)
+
     rects: list[BBox] = []
     for rect_el in root.iter("rect"):
-        x = rect_el.get("x")
-        y = rect_el.get("y")
-        w = rect_el.get("width")
-        h = rect_el.get("height")
-        if any(v is None for v in (x, y, w, h)):
-            continue
-        rects.append(BBox(
-            float(x), float(y), float(x) + float(w), float(y) + float(h),
-        ))
+        rb = _resolve_rect_bbox(rect_el, parent_map)
+        if rb is not None:
+            rects.append(rb)
 
     errors: list[str] = []
     for text_el in root.iter("text"):
         content = text_el.text or ""
         if not content.strip():
             continue
-        tb = text_bbox(text_el)
+        tb = text_bbox(text_el, parent_map)
         if tb is None:
             continue
 
@@ -197,15 +273,14 @@ def check_line_crosses_text(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
+    parent_map = _build_parent_map(root)
+
     lines: list[LineString] = []
     for line_el in root.iter("line"):
-        coords = (
-            line_el.get("x1"), line_el.get("y1"),
-            line_el.get("x2"), line_el.get("y2"),
-        )
-        if any(v is None for v in coords):
+        resolved = _resolve_line_coords(line_el, parent_map)
+        if resolved is None:
             continue
-        x1, y1, x2, y2 = (float(v) for v in coords)
+        x1, y1, x2, y2 = resolved
         lines.append(LineString([(x1, y1), (x2, y2)]))
 
     errors: list[str] = []
@@ -213,7 +288,7 @@ def check_line_crosses_text(
         content = text_el.text or ""
         if not content.strip():
             continue
-        tb = text_bbox(text_el)
+        tb = text_bbox(text_el, parent_map)
         if tb is None:
             continue
         text_poly = tb.to_shapely().buffer(padding)
@@ -237,14 +312,14 @@ def check_path_crosses_text(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
-    parent_map = {child: parent for parent in root.iter() for child in parent}
+    parent_map = _build_parent_map(root)
 
     text_labels: list[tuple[str, BBox]] = []
     for text_el in root.iter("text"):
         content = text_el.text or ""
         if not content.strip():
             continue
-        tb = text_bbox(text_el)
+        tb = text_bbox(text_el, parent_map)
         if tb is not None:
             text_labels.append((content.strip(), tb))
 
@@ -253,8 +328,11 @@ def check_path_crosses_text(
     for rect_el in root.iter("rect"):
         if rect_el.get("stroke-dasharray"):
             continue
-        rb = _parse_rect_bbox(rect_el)
+        rb = _resolve_rect_bbox(rect_el, parent_map)
         if rb is None:
+            continue
+        # Apply max_area filter like _parse_rect_bbox
+        if rb.width * (rb.y_max - rb.y_min) > 500_000:
             continue
         contained: list[str] = []
         for label, tb in text_labels:
@@ -266,21 +344,12 @@ def check_path_crosses_text(
 
     errors: list[str] = []
     for path_el in root.iter("path"):
-        d = path_el.get("d", "")
-        if not d:
-            continue
         if _is_inside_defs(path_el, parent_map):
             continue
-        try:
-            parsed = parse_path(d)
-            line = path_to_linestring(d)
-        except Exception:
+        resolved = _resolve_path_linestring(path_el, parent_map)
+        if resolved is None:
             continue
-
-        start_pt = parsed.point(0)
-        end_pt = parsed.point(1)
-        start_x, start_y = start_pt.real, start_pt.imag
-        end_x, end_y = end_pt.real, end_pt.imag
+        line, parsed, start_x, start_y, end_x, end_y = resolved
 
         for label, tb in text_labels:
             if _point_in_bbox(start_x, start_y, tb) or _point_in_bbox(end_x, end_y, tb):
@@ -353,14 +422,14 @@ def check_path_endpoint_inside_rect(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
-    parent_map = {child: parent for parent in root.iter() for child in parent}
+    parent_map = _build_parent_map(root)
 
     text_labels: list[tuple[str, BBox]] = []
     for text_el in root.iter("text"):
         content = text_el.text or ""
         if not content.strip():
             continue
-        tb = text_bbox(text_el)
+        tb = text_bbox(text_el, parent_map)
         if tb is not None:
             text_labels.append((content.strip(), tb))
 
@@ -368,8 +437,11 @@ def check_path_endpoint_inside_rect(
     for rect_el in root.iter("rect"):
         if rect_el.get("stroke-dasharray"):
             continue
-        rb = _parse_rect_bbox(rect_el, max_area=50_000)
+        rb = _resolve_rect_bbox(rect_el, parent_map)
         if rb is None:
+            continue
+        # Apply max_area filter
+        if rb.width * (rb.y_max - rb.y_min) > 50_000:
             continue
         label = ""
         for name, tb in text_labels:
@@ -381,26 +453,23 @@ def check_path_endpoint_inside_rect(
 
     errors: list[str] = []
     for path_el in root.iter("path"):
-        d = path_el.get("d", "")
-        if not d:
-            continue
         if _is_inside_defs(path_el, parent_map):
             continue
-        try:
-            parsed = parse_path(d)
-        except Exception:
+        resolved = _resolve_path_linestring(path_el, parent_map)
+        if resolved is None:
             continue
+        _line, _parsed, start_x, start_y, end_x, end_y = resolved
 
-        for t_val in (0.0, 1.0):
-            pt = parsed.point(t_val)
-            px, py = pt.real, pt.imag
+        for px, py, end_name in [
+            (start_x, start_y, "start"),
+            (end_x, end_y, "end"),
+        ]:
             for rb, label in solid_rects:
                 if (rb.x_min + inset < px < rb.x_max - inset
                         and rb.y_min + inset < py < rb.y_max - inset):
                     desc = f"'{label}'" if label else "unlabeled"
-                    end = "start" if t_val == 0.0 else "end"
                     errors.append(
-                        f"Path {end}point inside rect {desc} "
+                        f"Path {end_name}point inside rect {desc} "
                         f"at ({px:.0f}, {py:.0f})"
                     )
 
@@ -418,11 +487,13 @@ def check_text_on_cluster_border(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
+    parent_map = _build_parent_map(root)
+
     cluster_rects: list[tuple[BBox, float]] = []
     for rect_el in root.iter("rect"):
         if not rect_el.get("stroke-dasharray"):
             continue
-        rb = _parse_rect_bbox(rect_el)
+        rb = _resolve_rect_bbox(rect_el, parent_map)
         if rb is None:
             continue
         stroke_w = float(rect_el.get("stroke-width", "2"))
@@ -433,7 +504,7 @@ def check_text_on_cluster_border(
         content = text_el.text or ""
         if not content.strip():
             continue
-        tb = text_bbox(text_el)
+        tb = text_bbox(text_el, parent_map)
         if tb is not None:
             text_labels.append((content.strip(), tb))
 
@@ -465,12 +536,14 @@ def check_child_rect_clips_parent(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
+    parent_map = _build_parent_map(root)
+
     text_labels: list[tuple[str, BBox]] = []
     for text_el in root.iter("text"):
         content = text_el.text or ""
         if not content.strip():
             continue
-        tb = text_bbox(text_el)
+        tb = text_bbox(text_el, parent_map)
         if tb is not None:
             text_labels.append((content.strip(), tb))
 
@@ -478,12 +551,15 @@ def check_child_rect_clips_parent(
     child_rects: list[tuple[BBox, str]] = []
     for rect_el in root.iter("rect"):
         if rect_el.get("stroke-dasharray"):
-            rb = _parse_rect_bbox(rect_el)
+            rb = _resolve_rect_bbox(rect_el, parent_map)
             if rb is not None:
                 parent_rects.append(rb)
             continue
-        rb = _parse_rect_bbox(rect_el, max_area=50_000)
+        rb = _resolve_rect_bbox(rect_el, parent_map)
         if rb is None:
+            continue
+        # Apply max_area filter
+        if rb.width * (rb.y_max - rb.y_min) > 50_000:
             continue
         label = ""
         for name, tb in text_labels:
@@ -530,11 +606,13 @@ def check_text_on_solid_border(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
+    parent_map = _build_parent_map(root)
+
     solid_rects: list[tuple[BBox, float]] = []
     for rect_el in root.iter("rect"):
         if rect_el.get("stroke-dasharray"):
             continue
-        rb = _parse_rect_bbox(rect_el)
+        rb = _resolve_rect_bbox(rect_el, parent_map)
         if rb is None:
             continue
         stroke = rect_el.get("stroke")
@@ -548,7 +626,7 @@ def check_text_on_solid_border(
         content = text_el.text or ""
         if not content.strip():
             continue
-        tb = text_bbox(text_el)
+        tb = text_bbox(text_el, parent_map)
         if tb is not None:
             text_labels.append((content.strip(), tb))
 
@@ -579,6 +657,8 @@ def check_text_occluded_by_rect(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
+    parent_map = _build_parent_map(root)
+
     # Walk elements in document order, tracking text elements seen so far
     preceding_texts: list[tuple[str, BBox]] = []
     errors: list[str] = []
@@ -588,14 +668,14 @@ def check_text_occluded_by_rect(
             content = elem.text or ""
             if not content.strip():
                 continue
-            tb = text_bbox(elem)
+            tb = text_bbox(elem, parent_map)
             if tb is not None:
                 preceding_texts.append((content.strip(), tb))
         elif elem.tag == "rect":
             fill = elem.get("fill", "")
             if not fill or fill == "none" or fill == "transparent":
                 continue
-            rb = _parse_rect_bbox(elem)
+            rb = _resolve_rect_bbox(elem, parent_map)
             if rb is None:
                 continue
             for label, tb in preceding_texts:
@@ -622,6 +702,8 @@ def check_text_outside_viewport(
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
 
+    parent_map = _build_parent_map(root)
+
     # Parse viewport dimensions from the root <svg> element
     w_str = root.get("width")
     h_str = root.get("height")
@@ -635,7 +717,7 @@ def check_text_outside_viewport(
         content = text_el.text or ""
         if not content.strip():
             continue
-        tb = text_bbox(text_el)
+        tb = text_bbox(text_el, parent_map)
         if tb is None:
             continue
 

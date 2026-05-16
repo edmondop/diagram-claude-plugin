@@ -1,0 +1,13 @@
+<svg width="200" height="150" xmlns="http://www.w3.org/2000/svg">
+<!-- Mimics graphviz SVG output: all content wrapped in a <g> with translate.
+     Text elements have negative Y coordinates that only make sense after
+     the ancestor translate is applied.
+     Without transform resolution, the linter would report these as
+     "extends outside viewport (top by Xpx)" because raw y is negative. -->
+<g id="graph0" class="graph" transform="translate(4,146)">
+  <!-- text at y=-120: resolved y = -120 + 146 = 26, so y_min = 26-14 = 12 (inside) -->
+  <text x="100" y="-120" font-size="14" text-anchor="middle">Hello</text>
+  <!-- text at y=-30: resolved y = -30 + 146 = 116, so y_min = 116-14 = 102 (inside) -->
+  <text x="100" y="-30" font-size="14" text-anchor="middle">World</text>
+</g>
+</svg>
