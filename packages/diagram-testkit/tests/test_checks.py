@@ -242,6 +242,32 @@ class TestTextOutsideViewport:
             f"got {len(errors)}: " + "\n".join(errors)
         )
 
+    def test_graphviz_translate_transform_resolves_correctly(self):
+        """Graphviz wraps content in <g transform="translate(tx, ty)">.
+
+        Text elements use negative Y coordinates that map into the viewport
+        after the transform is applied. Without transform resolution, the
+        linter falsely reports all text as outside the viewport.
+        """
+        errors = check_text_outside_viewport(
+            PASSING_DIR / "graphviz-translated-text-inside-viewport.svg"
+        )
+        assert not errors, (
+            f"Expected no viewport errors after resolving translate transform, "
+            f"got: " + "\n".join(errors)
+        )
+
+
+    def test_graphviz_path_avoids_text_with_transform(self):
+        """Path and text are far apart in resolved coordinates."""
+        errors = check_path_crosses_text(
+            PASSING_DIR / "graphviz-path-avoids-text-with-transform.svg"
+        )
+        assert not errors, (
+            f"Expected no crossing errors after resolving transforms, "
+            f"got: " + "\n".join(errors)
+        )
+
 
 class TestPathEndpointInsideRect:
 

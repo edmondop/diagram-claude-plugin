@@ -1,5 +1,6 @@
 """Geometry primitives for SVG quality checks."""
 
+import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
@@ -10,6 +11,13 @@ from svgpathtools import parse_path
 PATH_SAMPLES = 200
 DEFAULT_FONT_SIZE = 10.0
 CHAR_WIDTH_RATIO = 0.6
+
+_TRANSLATE_RE = re.compile(
+    r"translate\(\s*([^,\s]+)[\s,]+([^)]+)\)"
+)
+_SCALE_RE = re.compile(
+    r"scale\(\s*([^,\s)]+)(?:[\s,]+([^)]+))?\)"
+)
 
 
 @dataclass
@@ -62,7 +70,52 @@ def bbox_from_path_d(d: str) -> BBox | None:
         return None
 
 
-def text_bbox(elem: ET.Element) -> BBox | None:
+def _parse_transform(transform: str) -> tuple[float, float, float, float]:
+    """Parse a transform attribute and return (tx, ty, sx, sy)."""
+    tx, ty = 0.0, 0.0
+    sx, sy = 1.0, 1.0
+    m = _TRANSLATE_RE.search(transform)
+    if m:
+        tx = float(m.group(1))
+        ty = float(m.group(2))
+    m = _SCALE_RE.search(transform)
+    if m:
+        sx = float(m.group(1))
+        sy = float(m.group(2)) if m.group(2) else sx
+    return tx, ty, sx, sy
+
+
+def resolve_ancestor_transform(
+    elem: ET.Element,
+    parent_map: dict[ET.Element, ET.Element],
+) -> tuple[float, float, float, float]:
+    """Walk up the tree accumulating translate and scale transforms.
+
+    Returns (total_tx, total_ty, total_sx, total_sy).
+    """
+    total_tx, total_ty = 0.0, 0.0
+    total_sx, total_sy = 1.0, 1.0
+    current = elem
+    for _ in range(20):
+        parent = parent_map.get(current)
+        if parent is None:
+            break
+        transform = parent.get("transform")
+        if transform:
+            tx, ty, sx, sy = _parse_transform(transform)
+            # The translate applies after the parent's scale
+            total_tx = total_tx * sx + tx
+            total_ty = total_ty * sy + ty
+            total_sx *= sx
+            total_sy *= sy
+        current = parent
+    return total_tx, total_ty, total_sx, total_sy
+
+
+def text_bbox(
+    elem: ET.Element,
+    parent_map: dict[ET.Element, ET.Element] | None = None,
+) -> BBox | None:
     x_str = elem.get("x")
     y_str = elem.get("y")
     if x_str is None or y_str is None:
@@ -80,4 +133,17 @@ def text_bbox(elem: ET.Element) -> BBox | None:
         x_min = x - text_w
     else:
         x_min = x
-    return BBox(x_min, y - font_size, x_min + text_w, y)
+
+    y_min = y - font_size
+    y_max = y
+    x_max = x_min + text_w
+
+    # Apply ancestor transforms if parent_map is provided
+    if parent_map is not None:
+        tx, ty, sx, sy = resolve_ancestor_transform(elem, parent_map)
+        x_min = x_min * sx + tx
+        x_max = x_max * sx + tx
+        y_min = y_min * sy + ty
+        y_max = y_max * sy + ty
+
+    return BBox(x_min, y_min, x_max, y_max)

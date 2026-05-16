@@ -1,0 +1,11 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+<!-- Graphviz-style SVG with translate transform. The path and text are far
+     apart in resolved coordinates, but without transform resolution the linter
+     might compute incorrect bounding boxes. -->
+<g id="graph0" class="graph" transform="translate(4,196)">
+  <!-- Text at resolved position: x=150, y=-160+196=36 -->
+  <text x="150" y="-160" font-size="14" text-anchor="middle">NodeA</text>
+  <!-- Path far below the text in resolved coords: from (10, -50+196=146) to (290, -50+196=146) -->
+  <path d="M 10,-50 L 290,-50" stroke="black" fill="none"/>
+</g>
+</svg>
